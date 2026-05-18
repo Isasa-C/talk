@@ -345,6 +345,7 @@ select:focus-visible,
 }
 .practice-text.cn { font-family: 'PingFang SC','Microsoft YaHei',serif; font-style: normal; font-size: 17px; }
 .practice-text.en { font-family: Georgia,serif; }
+.practice-text.ko { font-family: 'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif; font-style: normal; font-size: 17px; line-height: 1.85; }
 .practice-note {
   font-size: 12px;
   color: var(--text2);
@@ -793,6 +794,33 @@ const DAY_EN_FOCUS = {
 const DAY_CN_TOPIC = {1:'介绍今天做的一件事',2:'介绍一本你喜欢的书',3:'介绍一个你喜欢的城市',4:'讲一次你紧张但完成了的经历',5:'解释为什么要练口才',6:'总结这一周的变化',0:'自由表达一个话题'};
 const DAY_EN_TOPIC = {1:'Introduce yourself.',2:'Talk about your study or work experience.',3:'Describe a project you are proud of.',4:'Explain why you want to improve your English.',5:'Talk about one challenge you overcame.',6:'Describe your ideal job.',0:'Summarize what you practiced this week.'};
 
+const KOREAN_STAGES = [
+  { title:'서울 억양 핵심', sub:'Core Intonation Rule', dur:180, lang:'ko',
+    text:'평탄하게 흐르다가\n강조어에서 한 번만 튀고\n어미에서 확실히 내려온다.\n\n잘 됐어요↘\n진짜↑↑ 중요해요↘\n근데↗ 아직 끝난 말이 아니에요.',
+    note:'중국어처럼 음절마다 올렸다 내리지 말고, 덩어리 단위로 움직이기.' },
+  { title:'어미 하강 연습', sub:'Sentence Endings Down', dur:300, lang:'ko',
+    text:'~더라고요 ↘↘\n힘들더라고요.\n끌어내리더라고요.\n\n~거든요 ↘↘\n마음이 안 좋았거든요.\n그렇게 헤어지긴 싫거든요.\n\n~것 같아요 ↘\n중요한 것 같아요.\n도움이 됐던 것 같아요.\n\n~네요 ↘\n슬픈 마음이네요.\n모르겠네요.',
+    note:'마지막 어미는 질문처럼 올리지 말고 낮고 확실하게 닫기.' },
+  { title:'강조어 한 번만', sub:'One Peak Only', dur:240, lang:'ko',
+    text:'진짜↑↑ 중요해요↘\n엄청↑ 중요한 미팅을 가고 있어요↘\n굉장히↑ 바닥으로 끌어내리더라고요↘\n꼭↑ 기억해 줬으면 좋겠어요↘\n딱↑ 얘기를 해 보면 알 수 있잖아요↗↘',
+    note:'강조어 전체가 한 번 올라갔다 내려온다. 진↗짜↘처럼 음절마다 흔들지 않기.' },
+  { title:'필러 낮게', sub:'Fillers Low & Short', dur:180, lang:'ko',
+    text:'뭐  → 짧고 평탄\n어  → 짧고 낮게\n그냥 → 짧고 평탄\n약간 → 살짝만, 낮게\n좀  → 짧고 낮게\n막  → 짧게 강조\n아무튼 → 살짝 이어가기\n\n뭐 나쁘게가 아니라 좋게 이별을 하게 되었고요.\n어, 솔직히 혼자 운동할 만하지.',
+    note:'필러를 크게 강조하지 말기. 말 사이에 가볍게 지나가게.' },
+  { title:'연결 어미', sub:'Continue Up, Finish Down', dur:300, lang:'ko',
+    text:'~하고 ↗\n좋아하고, 만나는 거 좋아하고,\n\n~인데 ↗\n에너지를 얻는 사람인데,\n\n~지만 ↗\n찾지 못했지만,\n불안하긴 하지만,\n\n마지막은 내려오기 ↘\n믿기로 했어요.\n힘들었어요.\n중입니다.',
+    note:'이어지는 말은 살짝 올리고, 끝나는 말은 반드시 내리기.' },
+  { title:'쉐도잉 Part 1', sub:'Meeting Route', dur:420, lang:'ko',
+    text:'저는 지금 엄청 중요한 미팅을 가고 있어요.\n긴장이 되기도 했는지 제가 잠을 좀 잘 못 잔 거예요.\n근데 저도 좀 진짜 마음이 안 좋았거든요.\n너무 두려워하지 않기로 했어요.\n딱 얘기를 해 보면 저한테 관심이 있는지 없는지 되게 알 수 있잖아요.\n그 자신을 믿는 힘이 진짜 중요해요, 여러분.',
+    note:'엄청/진짜/딱만 살짝 튀고, 있어요/거예요/거든요/했어요는 내려오기.' },
+  { title:'쉐도잉 Part 2', sub:'Suwon Route', dur:420, lang:'ko',
+    text:'저는 지금 수원을 가고 있습니다.\n공복 시간이 너무 길어지면 약간 힘들더라고요.\n여러분들도 막 살 뺀다고 무리하게 그냥 공복으로 굶으면 안 돼요.\n언니가 저한테 너무너무 큰 힘이 되는 거예요.\n끝까지 가본 거죠. 이거 괜찮더라. 괜찮아지더라.\n너무 그거에 마음 쓰지 마라.',
+    note:'격식체 -습니다는 더 깊게 하강. 더라/마라는 낮고 짧게 툭.' },
+  { title:'쉐도잉 Part 3', sub:'Natural Vlog Tone', dur:420, lang:'ko',
+    text:'진짜 역대급으로 진짜 약간 운동을 놨거든요.\n운동을 할 에너지가 없는 거야.\n진짜 과장 아니에요, 여러분.\n그래 나 혼자 해보자.\n엄청 담백한 따뜻한 도넛츠. 음. 근데 좀 더 쫀득쫀득해요.\n최대한 편하게 옆에 있는 친구한테 말한 것처럼 좀 찍어 봤는데 어떨지 모르겠네요.\n안녕.',
+    note:'브이로그 톤: 자연스럽게 낮게 흐르고, 끝은 질문처럼 올리지 않기.' },
+];
+
 // Build today's stages dynamically
 function buildTodayStages(day, cnW, enW) {
   const tw = DAY_CN_TWISTER[day];
@@ -861,6 +889,10 @@ function buildPlans(day, cnW, enW) {
           text:"Today's topic:\n" + DAY_EN_TOPIC[day],
           note:"Structure: Today, I want to talk about… There are two reasons. First,… Second,… That is why…" }]
     },
+    ko: {
+      name:'Optional · 한국어', sub:'서울 억양 쉐도잉', icon:'한',
+      stages: KOREAN_STAGES
+    },
   };
 }
 function ef_for(day){ return DAY_EN_FOCUS[day] || DAY_EN_FOCUS[1]; }
@@ -908,7 +940,7 @@ function onSettingsChange() {
 // ══════════════════════════════════════════════
 // PLAN NAV
 // ══════════════════════════════════════════════
-const PLAN_ORDER = ['today','cn1','cn2','cn3','cn4','en1','en2','en3','en4'];
+const PLAN_ORDER = ['today','cn1','cn2','cn3','cn4','en1','en2','en3','en4','ko'];
 function buildPlanNav() {
   const nav = document.getElementById('planNav');
   nav.innerHTML = '';
@@ -1010,13 +1042,13 @@ function goToStage(idx) {
   const titleEl = document.getElementById('stageTitle');
   const langTag = document.createElement('span');
   langTag.className = 'lang-tag';
-  langTag.textContent = s.lang === 'en' ? 'EN' : '中文';
+  langTag.textContent = s.lang === 'en' ? 'EN' : (s.lang === 'ko' ? '한국어' : '中文');
   titleEl.textContent = s.title;
   titleEl.appendChild(langTag);
 
   // Practice text
   const textEl = document.getElementById('practiceText');
-  textEl.className = 'practice-text' + (s.lang==='en'?' en':' cn');
+  textEl.className = 'practice-text ' + (s.lang || 'cn');
   textEl.textContent = s.text || '';
   document.getElementById('practiceNote').textContent = s.note || '';
 
