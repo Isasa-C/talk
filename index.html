@@ -1,0 +1,1965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LinguaNews — Learn English & French</title>
+<style>
+:root{
+  --primary:#2563eb;--primary-light:#dbeafe;--bg:#f1f5f9;--white:#fff;
+  --text:#1e293b;--muted:#64748b;--border:#e2e8f0;--danger:#dc2626;
+  --green:#16a34a;--green-light:#dcfce7;--purple:#7c3aed;--purple-light:#ede9fe;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Georgia,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',serif;background:var(--bg);color:var(--text);min-height:100vh}
+.screen{display:none}
+.screen.active{display:flex}
+button{cursor:pointer}
+
+/* ═══ LANGUAGE ════════════════════════════════════════════════ */
+#langScreen{min-height:100vh;flex-direction:column;align-items:center;justify-content:center;
+  gap:2rem;background:linear-gradient(135deg,#1e3a8a,#7c3aed);color:#fff}
+#langScreen h1{font-size:3rem;letter-spacing:-.02em}
+#langScreen p{font-size:1.1rem;opacity:.8;font-family:sans-serif}
+.lang-cards{display:flex;gap:1.5rem}
+.lang-card{background:rgba(255,255,255,.13);border:2px solid rgba(255,255,255,.25);border-radius:16px;
+  padding:2rem 3rem;cursor:pointer;transition:all .2s;text-align:center;backdrop-filter:blur(8px)}
+.lang-card:hover{background:rgba(255,255,255,.22);transform:translateY(-4px);border-color:rgba(255,255,255,.5)}
+.lang-card .flag{font-size:3rem}
+.lang-card .lname{font-size:1.3rem;font-weight:bold;margin-top:.4rem}
+.lang-card .lsub{font-size:.82rem;opacity:.7;font-family:sans-serif;margin-top:.2rem}
+
+/* ═══ TOPICS ═════════════════════════════════════════════════ */
+#topicScreen{flex-direction:column;min-height:100vh;background:var(--bg)}
+.topic-header{text-align:center;margin-bottom:2.5rem}
+.topic-header h2{font-size:2rem;margin-bottom:.4rem}
+.topic-header p{color:var(--muted);font-family:sans-serif}
+.topics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;max-width:860px;margin:0 auto}
+.topic-card{background:var(--white);border-radius:14px;padding:1.75rem;cursor:pointer;
+  transition:all .2s;border:2px solid transparent;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.topic-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 8px 25px rgba(37,99,235,.15)}
+.topic-card .ticon{font-size:2.2rem;margin-bottom:.6rem}
+.topic-card .tname{font-size:1.1rem;font-weight:bold;margin-bottom:.2rem}
+.topic-card .tdesc{font-size:.82rem;color:var(--muted);font-family:sans-serif}
+.back-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border:1px solid var(--border);
+  border-radius:8px;background:none;font-size:.82rem;color:var(--muted);font-family:sans-serif;transition:all .15s}
+.back-btn:hover{background:var(--bg);color:var(--text)}
+
+/* ═══ READER ════════════════════════════════════════════════ */
+#readerScreen{flex-direction:column;height:100vh;overflow:hidden}
+.reader-nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 1.25rem;
+  height:52px;display:flex;align-items:center;gap:.6rem;flex-shrink:0;z-index:20}
+.nav-brand{font-size:1.1rem;font-weight:bold;color:var(--primary);margin-right:.25rem}
+.nav-lang{font-family:sans-serif;font-size:.78rem;color:var(--muted)}
+.nav-spacer{flex:1}
+.nav-btn{padding:.36rem .8rem;border:1px solid var(--border);border-radius:8px;background:none;
+  font-size:.75rem;font-family:sans-serif;color:var(--muted);transition:all .15s}
+.nav-btn:hover{background:var(--bg);color:var(--text)}
+.nav-btn.accent{background:var(--primary);color:#fff;border-color:var(--primary)}
+.nav-btn.accent:hover{background:#1d4ed8}
+.reader-layout{display:grid;grid-template-columns:240px 1fr 268px;flex:1;overflow:hidden;min-height:0}
+
+/* LEFT PANEL */
+.left-panel{background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.panel-hdr{padding:.9rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.panel-hdr h3{font-size:.73rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-family:sans-serif;font-weight:700}
+.hist-list{flex:1;overflow-y:auto;padding:.6rem}
+.hist-item{padding:.6rem .7rem;border-radius:8px;margin-bottom:.35rem;border:1px solid transparent;transition:background .15s}
+.hist-item:hover{background:var(--bg)}
+.hist-item.active{background:var(--primary-light);border-color:#93c5fd}
+.hist-date{font-size:.68rem;color:var(--muted);font-family:sans-serif;margin-bottom:.12rem}
+.hist-title{font-size:.78rem;font-weight:600;line-height:1.3}
+.hist-topic{font-size:.66rem;color:var(--primary);font-family:sans-serif;margin-top:.12rem;text-transform:uppercase;letter-spacing:.04em}
+.hist-empty{text-align:center;padding:2rem 1rem;color:var(--muted);font-family:sans-serif;font-size:.8rem}
+.hist-item{position:relative}
+.hist-del{position:absolute;top:.38rem;right:.38rem;background:none;border:none;color:var(--muted);
+  font-size:.8rem;opacity:0;transition:opacity .15s;border-radius:4px;padding:.05rem .25rem;line-height:1}
+.hist-item:hover .hist-del{opacity:1}
+.hist-del:hover{color:var(--danger);background:#fee2e2}
+
+/* CENTER */
+.center-panel{overflow-y:auto;padding:1.75rem 2rem;background:var(--bg)}
+.article-card{background:var(--white);border-radius:16px;padding:2rem;box-shadow:0 1px 3px rgba(0,0,0,.07);max-width:660px;margin:0 auto}
+.art-meta{display:flex;align-items:center;gap:.55rem;margin-bottom:.9rem;font-family:sans-serif;font-size:.75rem;flex-wrap:wrap}
+.art-badge{background:var(--primary-light);color:var(--primary);padding:.2rem .6rem;border-radius:999px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.65rem}
+.art-date{color:var(--muted)}
+.art-title{font-size:1.6rem;font-weight:bold;line-height:1.3;margin-bottom:.8rem}
+.art-sub{font-size:.93rem;color:var(--muted);font-family:sans-serif;line-height:1.55;margin-bottom:1.3rem;padding-bottom:1.3rem;border-bottom:1px solid var(--border)}
+
+/* Audio player */
+.audio-player{display:flex;align-items:center;gap:.8rem;background:var(--bg);border-radius:12px;padding:.8rem 1rem;margin-bottom:1.5rem;border:1px solid var(--border)}
+.play-btn{width:40px;height:40px;border-radius:50%;background:var(--primary);border:none;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s,background .15s}
+.play-btn:hover{transform:scale(1.07);background:#1d4ed8}
+.play-btn svg{fill:#fff}
+.audio-info{flex:1;font-family:sans-serif;min-width:0}
+.audio-lbl{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.audio-bar{width:100%;height:4px;background:var(--border);border-radius:2px;margin-top:.3rem;overflow:hidden}
+.audio-fill{height:100%;background:var(--primary);border-radius:2px;width:0%;transition:width .4s linear}
+.speed-btn{font-size:.72rem;font-family:sans-serif;color:var(--muted);padding:.2rem .45rem;
+  border-radius:6px;border:1px solid var(--border);background:#fff;transition:all .15s;white-space:nowrap}
+.speed-btn:hover{background:var(--primary-light);color:var(--primary)}
+.audio-file-name{font-size:.68rem;color:var(--green);font-family:sans-serif;text-align:center;margin-top:.3rem}
+
+/* Article body */
+.art-body{font-size:1.01rem;line-height:1.9;color:#334155;user-select:text}
+.art-body p{margin-bottom:1.1rem}
+.art-body .clickable-word{display:inline;cursor:pointer;border-radius:2px;transition:background .1s}
+.art-body .clickable-word:hover{background:#fef9c3}
+.art-tip{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--muted);
+  font-family:sans-serif;margin-top:1.3rem;padding-top:1.3rem;border-top:1px solid var(--border)}
+
+/* RIGHT PANEL */
+.right-panel{background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.vocab-badge{background:var(--primary-light);color:var(--primary);border-radius:999px;padding:.07rem .42rem;font-size:.66rem;font-weight:700;font-family:sans-serif}
+.vocab-input-area{padding:.8rem 1rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.vocab-row{display:flex;gap:.4rem}
+.vocab-input{flex:1;padding:.42rem .6rem;border:1px solid var(--border);border-radius:8px;font-size:.8rem;font-family:sans-serif;outline:none;transition:border-color .15s}
+.vocab-input:focus{border-color:var(--primary)}
+.vocab-add-btn{padding:.42rem .65rem;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:.8rem;font-family:sans-serif;transition:background .15s}
+.vocab-add-btn:hover{background:#1d4ed8}
+.vocab-hint{font-size:.66rem;color:var(--muted);font-family:sans-serif;margin-top:.3rem}
+.vocab-list{flex:1;overflow-y:auto;padding:.8rem 1rem}
+.vocab-empty{text-align:center;color:var(--muted);font-family:sans-serif;font-size:.8rem;padding:2rem .5rem;line-height:1.6}
+.vocab-item{padding:.6rem .65rem;border:1px solid var(--border);border-radius:10px;margin-bottom:.4rem;position:relative;transition:border-color .15s}
+.vocab-item:hover{border-color:var(--primary)}
+.vocab-word{font-weight:700;font-size:.88rem;margin-bottom:.15rem}
+.vocab-trans{font-size:.75rem;color:var(--primary);font-family:sans-serif;font-style:italic}
+.vocab-del{background:none;border:none;color:var(--muted);font-size:.85rem;border-radius:4px;
+  padding:.15rem .3rem;transition:all .15s;opacity:0;line-height:1}
+.vocab-item:hover .vocab-del{opacity:1}
+.vocab-del:hover{color:var(--danger);background:#fee2e2}
+.vi-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:.3rem;margin-bottom:.1rem}
+.vi-left{flex:1;min-width:0;display:flex;align-items:baseline;flex-wrap:wrap;gap:.3rem}
+.vi-right{display:flex;gap:.2rem;align-items:center;flex-shrink:0}
+.vi-pos{font-size:.62rem;color:var(--muted);font-family:sans-serif;font-style:italic;
+  background:var(--bg);padding:.05rem .28rem;border-radius:4px}
+.vi-play{background:var(--primary-light);border:none;color:var(--primary);border-radius:6px;
+  padding:.22rem .5rem;font-size:.78rem;transition:all .15s;line-height:1}
+.vi-play:hover{background:var(--primary);color:#fff}
+.vi-play.active{background:var(--primary);color:#fff}
+.vocab-def{font-size:.72rem;color:#475569;line-height:1.45;margin-top:.28rem;font-family:sans-serif}
+.vi-loading{font-size:.67rem;color:var(--muted);font-family:sans-serif;font-style:italic;margin-top:.2rem}
+
+/* ═══ TRANSLATION POPUP ══════════════════════════════════════ */
+#transPop{
+  position:fixed;z-index:1000;display:none;
+  background:#fff;border-radius:14px;
+  box-shadow:0 8px 32px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.06);
+  padding:1.1rem 1.2rem;min-width:200px;max-width:280px;
+  font-family:sans-serif;
+}
+#transPop::before{
+  content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);
+  border:7px solid transparent;border-top:0;border-bottom-color:#fff;
+  filter:drop-shadow(0 -2px 2px rgba(0,0,0,.08));
+}
+.tp-word{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:.2rem;font-family:Georgia,serif}
+.tp-dir{font-size:.68rem;color:var(--muted);margin-bottom:.5rem;letter-spacing:.04em;text-transform:uppercase}
+.tp-result{font-size:.95rem;color:var(--primary);font-weight:600;min-height:1.4rem;margin-bottom:.8rem;font-family:Georgia,serif}
+.tp-loading{color:var(--muted);font-size:.85rem;font-style:italic}
+.tp-actions{display:flex;gap:.5rem}
+.tp-add{flex:1;padding:.38rem;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:.78rem;transition:background .15s}
+.tp-add:hover{background:#1d4ed8}
+.tp-add:disabled{background:var(--green);cursor:default}
+.tp-close{padding:.38rem .6rem;border:1px solid var(--border);border-radius:8px;background:none;font-size:.78rem;color:var(--muted);transition:all .15s}
+.tp-close:hover{background:var(--bg)}
+
+/* ═══ UPLOAD MODAL ═══════════════════════════════════════════ */
+#uploadModal{
+  position:fixed;inset:0;z-index:500;display:none;
+  align-items:center;justify-content:center;
+  background:rgba(15,23,42,.45);backdrop-filter:blur(4px);
+}
+#uploadModal.open{display:flex}
+.upload-panel{
+  background:#fff;border-radius:20px;width:560px;max-width:95vw;max-height:90vh;
+  overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2);
+  padding:1.75rem;
+}
+.upload-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.upload-hdr h2{font-size:1.2rem;font-weight:bold}
+.upload-close{background:none;border:none;font-size:1.4rem;color:var(--muted);padding:.2rem .4rem;border-radius:6px;transition:all .15s}
+.upload-close:hover{background:var(--bg);color:var(--text)}
+.upload-section{margin-bottom:1.5rem}
+.upload-section h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;font-family:sans-serif;margin-bottom:.75rem}
+.drop-zone{
+  border:2px dashed var(--border);border-radius:12px;padding:1.5rem;
+  text-align:center;cursor:pointer;transition:all .2s;
+  font-family:sans-serif;
+}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--primary);background:var(--primary-light)}
+.drop-zone .dz-icon{font-size:2rem;margin-bottom:.5rem}
+.drop-zone .dz-label{font-size:.85rem;color:var(--text);font-weight:600;margin-bottom:.2rem}
+.drop-zone .dz-sub{font-size:.75rem;color:var(--muted)}
+.drop-zone input[type=file]{display:none}
+.upload-status{margin-top:.6rem;font-size:.8rem;font-family:sans-serif;color:var(--green);display:none}
+.upload-status.show{display:block}
+.upload-sep{height:1px;background:var(--border);margin:1.5rem 0}
+
+/* ═══ SHADOWING MODAL ═══════════════════════════════════════ */
+#shadowModal{position:fixed;inset:0;z-index:700;display:none;align-items:center;justify-content:center;
+  background:rgba(15,23,42,.65);backdrop-filter:blur(6px)}
+#shadowModal.open{display:flex}
+.sh-panel{background:#fff;border-radius:24px;width:740px;max-width:96vw;height:90vh;max-height:680px;
+  box-shadow:0 24px 80px rgba(0,0,0,.28);display:flex;flex-direction:column;overflow:hidden}
+.sh-hdr{padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;
+  justify-content:space-between;flex-shrink:0}
+.sh-hdr-left h3{font-size:1rem;font-weight:bold;margin-bottom:.1rem}
+.sh-hdr-left p{font-size:.75rem;color:var(--muted);font-family:sans-serif;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:500px}
+.sh-close{background:none;border:none;font-size:1.4rem;color:var(--muted);
+  padding:.2rem .4rem;border-radius:6px;transition:all .15s}
+.sh-close:hover{background:var(--bg);color:var(--text)}
+.sh-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:1.5rem 2rem;gap:1rem}
+.sh-ctx{color:var(--muted);font-size:.92rem;line-height:1.7;text-align:center;
+  max-width:600px;opacity:.45;font-style:italic;transition:opacity .3s}
+.sh-card{background:linear-gradient(135deg,var(--primary-light),#ede9fe);
+  border:2px solid var(--primary);border-radius:18px;padding:1.6rem 2rem;
+  text-align:center;max-width:640px;width:100%;box-shadow:0 4px 20px rgba(37,99,235,.1)}
+.sh-sentence{font-size:1.3rem;line-height:1.7;color:var(--text);font-weight:500}
+.sh-translation{font-size:.92rem;color:var(--purple);margin-top:.7rem;
+  font-family:sans-serif;font-style:italic;border-top:1px solid rgba(124,58,237,.2);padding-top:.6rem}
+.sh-trans-loading{font-size:.78rem;color:var(--muted);font-family:sans-serif;margin-top:.5rem}
+.sh-counter{font-size:.75rem;color:var(--muted);font-family:sans-serif;margin-top:.3rem;letter-spacing:.02em}
+.sh-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);flex-shrink:0;background:var(--bg)}
+.sh-top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:.5rem}
+.sh-speed-group{display:flex;align-items:center;gap:.3rem}
+.sh-spd-lbl{font-size:.7rem;color:var(--muted);font-family:sans-serif;margin-right:.1rem}
+.sh-spd{padding:.2rem .45rem;border:1px solid var(--border);border-radius:6px;background:#fff;
+  font-size:.72rem;font-family:sans-serif;color:var(--muted);transition:all .15s}
+.sh-spd:hover{border-color:var(--primary);color:var(--primary)}
+.sh-spd.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.sh-toggle-group{display:flex;gap:.4rem}
+.sh-tog{padding:.28rem .7rem;border:1px solid var(--border);border-radius:7px;background:#fff;
+  font-size:.75rem;font-family:sans-serif;color:var(--muted);transition:all .15s}
+.sh-tog:hover{border-color:var(--primary);color:var(--primary)}
+.sh-tog.on{background:var(--primary-light);color:var(--primary);border-color:var(--primary)}
+.sh-controls{display:flex;align-items:center;justify-content:center;gap:.6rem}
+.sh-nav{padding:.5rem .9rem;border:1px solid var(--border);border-radius:10px;background:#fff;
+  font-size:.85rem;font-family:sans-serif;color:var(--text);transition:all .15s}
+.sh-nav:hover:not(:disabled){background:var(--bg)}
+.sh-nav:disabled{opacity:.35;cursor:default}
+.sh-play{padding:.55rem 2rem;background:var(--primary);color:#fff;border:none;border-radius:10px;
+  font-size:1rem;font-family:sans-serif;font-weight:600;transition:all .15s;min-width:130px}
+.sh-play:hover{background:#1d4ed8}
+.sh-play.playing{background:#dc2626}
+.sh-play.playing:hover{background:#b91c1c}
+.sh-progress-row{margin-top:.85rem;display:flex;align-items:center;gap:.7rem}
+.sh-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.sh-fill{height:100%;background:var(--primary);border-radius:2px;transition:width .35s}
+
+/* Launch button */
+.shadow-launch{width:100%;padding:.55rem;background:var(--purple-light);color:var(--purple);
+  border:1.5px solid #c4b5fd;border-radius:10px;font-size:.85rem;font-family:sans-serif;
+  margin-bottom:1.5rem;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.shadow-launch:hover{background:var(--purple);color:#fff;border-color:var(--purple)}
+
+/* ═══ REFORMAT EDITOR MODAL ════════════════════════════════ */
+#reformatModal{position:fixed;inset:0;z-index:600;display:none;align-items:center;justify-content:center;
+  background:rgba(15,23,42,.5);backdrop-filter:blur(4px)}
+#reformatModal.open{display:flex}
+.reformat-panel{background:#fff;border-radius:20px;width:900px;max-width:96vw;height:82vh;
+  max-height:700px;box-shadow:0 24px 64px rgba(0,0,0,.22);display:flex;flex-direction:column;overflow:hidden}
+.reformat-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;
+  border-bottom:1px solid var(--border);flex-shrink:0}
+.reformat-hdr h2{font-size:1.1rem;font-weight:bold}
+.reformat-close{background:none;border:none;font-size:1.4rem;color:var(--muted);padding:.2rem .4rem;
+  border-radius:6px;transition:all .15s}
+.reformat-close:hover{background:var(--bg);color:var(--text)}
+.reformat-split{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;gap:0}
+.reformat-col{display:flex;flex-direction:column;overflow:hidden}
+.reformat-col:first-child{border-right:1px solid var(--border)}
+.reformat-col-hdr{padding:.65rem 1.1rem;border-bottom:1px solid var(--border);font-size:.73rem;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;font-family:sans-serif;
+  flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.reformat-textarea{flex:1;width:100%;border:none;outline:none;resize:none;padding:1.1rem;
+  font-size:.9rem;font-family:Georgia,serif;line-height:1.75;color:var(--text);overflow-y:auto}
+.reformat-preview{flex:1;overflow-y:auto;padding:1.1rem 1.4rem;font-size:.9rem;
+  font-family:Georgia,serif;line-height:1.75;color:var(--text)}
+.reformat-preview p{margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px dashed var(--border)}
+.reformat-preview p:last-child{border-bottom:none}
+.reformat-footer{padding:.85rem 1.4rem;border-top:1px solid var(--border);display:flex;
+  align-items:center;justify-content:space-between;flex-shrink:0;background:var(--bg)}
+.reformat-tip{font-size:.75rem;color:var(--muted);font-family:sans-serif}
+.reformat-apply{padding:.5rem 1.2rem;background:var(--primary);color:#fff;border:none;border-radius:8px;
+  font-size:.85rem;font-family:sans-serif;transition:background .15s}
+.reformat-apply:hover{background:#1d4ed8}
+.edit-format-btn{display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .65rem;
+  border:1px solid var(--border);border-radius:7px;background:none;font-size:.72rem;
+  font-family:sans-serif;color:var(--muted);transition:all .15s}
+.edit-format-btn:hover{background:var(--primary-light);color:var(--primary);border-color:var(--primary)}
+.para-count{font-size:.68rem;color:var(--muted);font-family:sans-serif}
+
+/* ═══ SELECTION TOOLTIP ════════════════════════════════════ */
+#selTip{
+  position:fixed;background:#1e293b;color:#fff;padding:.35rem .65rem;
+  border-radius:8px;font-size:.75rem;font-family:sans-serif;display:none;
+  z-index:900;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+#selTip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:#1e293b}
+
+/* ═══ SCROLLBARS ════════════════════════════════════════════ */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- ── HIDDEN YOUTUBE PLAYER ──────────────────────────────── -->
+<div id="ytPlayerEl" style="position:fixed;bottom:0;right:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1"></div>
+
+<!-- ── TRANSLATION POPUP ─────────────────────────────────── -->
+<div id="transPop">
+  <div class="tp-word" id="tpWord"></div>
+  <div class="tp-dir" id="tpDir"></div>
+  <div class="tp-result" id="tpResult"><span class="tp-loading">Translating…</span></div>
+  <div class="tp-actions">
+    <button class="tp-add" id="tpAddBtn" onclick="addTransToVocab()">+ Add to Dictionary</button>
+    <button class="tp-close" onclick="closeTrans()">✕</button>
+  </div>
+</div>
+
+<!-- ── SHADOWING MODAL ────────────────────────────────────── -->
+<div id="shadowModal">
+  <div class="sh-panel">
+    <div class="sh-hdr">
+      <div class="sh-hdr-left">
+        <h3>🎙 Shadowing Practice</h3>
+        <p id="shArticleTitle"></p>
+      </div>
+      <button class="sh-close" onclick="closeShadowing()">✕</button>
+    </div>
+
+    <div id="shYtContainer" style="display:none;padding:0 1rem .5rem">
+      <div style="position:relative;padding-bottom:56.25%;height:0;border-radius:10px;overflow:hidden;background:#000">
+        <div id="shYtEl" style="position:absolute;top:0;left:0;width:100%;height:100%"></div>
+      </div>
+    </div>
+    <div class="sh-body" id="shBody">
+      <!-- rendered by shRender() -->
+    </div>
+
+    <div class="sh-footer">
+      <div class="sh-top-row">
+        <div class="sh-speed-group">
+          <span class="sh-spd-lbl">Speed:</span>
+          <button class="sh-spd" id="shS075" onclick="shSetRate(0.75)">0.75×</button>
+          <button class="sh-spd on" id="shS1"   onclick="shSetRate(1.0)">1×</button>
+          <button class="sh-spd" id="shS125" onclick="shSetRate(1.25)">1.25×</button>
+          <button class="sh-spd" id="shS15"  onclick="shSetRate(1.5)">1.5×</button>
+        </div>
+        <div class="sh-toggle-group">
+          <button class="sh-tog on" id="shAutoBtn" onclick="shToggleAuto()" title="Auto-advance to next sentence">⏭ Auto</button>
+          <button class="sh-tog" id="shLoopBtn" onclick="shToggleLoop()" title="Loop current sentence">↻ Loop</button>
+          <button class="sh-tog" id="shTransBtn" onclick="shToggleTrans()" title="Show translation">🌐 Translation</button>
+        </div>
+      </div>
+
+      <div class="sh-controls">
+        <button class="sh-nav" id="shPrevBtn" onclick="shPrev()">◀ Prev</button>
+        <button class="sh-play" id="shPlayBtn" onclick="shTogglePlay()">▶ Play</button>
+        <button class="sh-nav" id="shMarkBtn" onclick="shMarkTime()" style="display:none;background:var(--green);color:#fff;border-color:var(--green)">📌 Mark</button>
+        <button class="sh-nav" id="shNextBtn" onclick="shNext()">Next ▶</button>
+      </div>
+
+      <div class="sh-progress-row">
+        <div class="sh-bar"><div class="sh-fill" id="shFill"></div></div>
+        <span id="shCounterFtr" style="font-size:.72rem;color:var(--muted);font-family:sans-serif;white-space:nowrap"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── REFORMAT EDITOR MODAL ─────────────────────────────── -->
+<div id="reformatModal">
+  <div class="reformat-panel">
+    <div class="reformat-hdr">
+      <h2>✏️ Edit Article Format</h2>
+      <button class="reformat-close" onclick="closeReformat()">✕</button>
+    </div>
+    <div class="reformat-split">
+      <!-- Left: editable source -->
+      <div class="reformat-col">
+        <div class="reformat-col-hdr">
+          <span>Edit — add blank lines to split paragraphs</span>
+          <span class="para-count" id="rfParaCount"></span>
+        </div>
+        <textarea class="reformat-textarea" id="rfTextarea"
+          oninput="onRfInput(this.value)"
+          placeholder="Your article text. Each blank line creates a new paragraph."></textarea>
+      </div>
+      <!-- Right: live preview -->
+      <div class="reformat-col">
+        <div class="reformat-col-hdr"><span>Preview</span></div>
+        <div class="reformat-preview" id="rfPreview"></div>
+      </div>
+    </div>
+    <div class="reformat-footer">
+      <span class="reformat-tip">💡 Blank line = paragraph break &nbsp;·&nbsp; Each paragraph shown with a dashed separator in preview</span>
+      <button class="reformat-apply" onclick="applyReformat()">Apply Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SELECTION TOOLTIP ─────────────────────────────────── -->
+<div id="selTip"></div>
+
+<!-- ── UPLOAD MODAL ──────────────────────────────────────── -->
+<div id="uploadModal">
+  <div class="upload-panel">
+    <div class="upload-hdr">
+      <h2>Upload Content</h2>
+      <button class="upload-close" onclick="closeUpload()">✕</button>
+    </div>
+
+    <!-- Article upload -->
+    <div class="upload-section">
+      <h3>📄 Article / Text File</h3>
+      <div class="drop-zone" id="artDrop" onclick="document.getElementById('artFile').click()"
+        ondragover="dzOver(event,'artDrop')" ondragleave="dzLeave('artDrop')" ondrop="dzDrop(event,'article')">
+        <input type="file" id="artFile" accept=".txt,.md" onchange="handleArtFile(this.files[0])"/>
+        <div class="dz-icon">📝</div>
+        <div class="dz-label">Drop a .txt file here</div>
+        <div class="dz-sub">or click to browse · plain text files supported</div>
+      </div>
+      <div class="upload-status" id="artStatus"></div>
+    </div>
+
+    <div class="upload-sep"></div>
+
+    <!-- Audio upload -->
+    <div class="upload-section">
+      <h3>🎧 Audio Narration</h3>
+      <div class="drop-zone" id="audioDrop" onclick="document.getElementById('audioFile').click()"
+        ondragover="dzOver(event,'audioDrop')" ondragleave="dzLeave('audioDrop')" ondrop="dzDrop(event,'audio')">
+        <input type="file" id="audioFile" accept="audio/*" onchange="handleAudioFile(this.files[0])"/>
+        <div class="dz-icon">🎵</div>
+        <div class="dz-label">Drop an audio file here</div>
+        <div class="dz-sub">MP3, WAV, OGG, M4A · replaces text-to-speech</div>
+      </div>
+      <div class="upload-status" id="audioStatus"></div>
+    </div>
+
+    <div class="upload-sep"></div>
+
+    <!-- Write / Paste -->
+    <div class="upload-section">
+      <h3>✏️ Write / Paste Article</h3>
+      <input id="writeTitle" type="text"
+        style="width:100%;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;
+               font-size:.88rem;font-family:Georgia,serif;outline:none;margin-bottom:.6rem;
+               transition:border-color .15s"
+        placeholder="Title (optional — first line of text used if left blank)"
+        onfocus="this.style.borderColor='var(--primary)'"
+        onblur="this.style.borderColor='var(--border)'"/>
+      <textarea id="writeBody"
+        style="width:100%;height:180px;padding:.65rem .75rem;border:1px solid var(--border);
+               border-radius:8px;font-size:.88rem;font-family:Georgia,serif;line-height:1.7;
+               resize:vertical;outline:none;transition:border-color .15s"
+        placeholder="Paste or type your article here — any format works. Paragraphs can be separated by blank lines or single line breaks, or just paste a continuous block of text."
+        onfocus="this.style.borderColor='var(--primary)'"
+        onblur="this.style.borderColor='var(--border)'"></textarea>
+      <button onclick="loadWrittenArticle()"
+        style="margin-top:.65rem;width:100%;padding:.55rem;background:var(--primary);color:#fff;
+               border:none;border-radius:8px;font-size:.85rem;font-family:sans-serif;
+               cursor:pointer;transition:background .15s"
+        onmouseover="this.style.background='#1d4ed8'"
+        onmouseout="this.style.background='var(--primary)'">
+        Load Article →
+      </button>
+      <div class="upload-status" id="writeStatus"></div>
+    </div>
+
+    <div class="upload-sep"></div>
+
+    <!-- YouTube import -->
+    <div class="upload-section">
+      <h3>▶️ YouTube — Video + Transcript</h3>
+      <p style="font-size:.78rem;color:var(--muted);font-family:sans-serif;margin-bottom:.7rem">
+        1) Paste the YouTube link. 2) On YouTube click <b>⋯ → Open transcript</b>, select all text, paste below. Then Import.
+      </p>
+      <input id="ytInput" type="url"
+        style="width:100%;box-sizing:border-box;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;
+               font-size:.85rem;font-family:sans-serif;outline:none;transition:border-color .15s;margin-bottom:.5rem"
+        placeholder="https://www.youtube.com/watch?v=..."
+        onfocus="this.style.borderColor='var(--primary)'"
+        onblur="this.style.borderColor='var(--border)'" />
+      <textarea id="ytTranscript"
+        style="width:100%;box-sizing:border-box;height:120px;padding:.5rem .75rem;border:1px solid var(--border);
+               border-radius:8px;font-size:.82rem;font-family:sans-serif;resize:vertical;outline:none;
+               transition:border-color .15s;margin-bottom:.5rem"
+        placeholder="Paste transcript here (from YouTube → ··· → Open transcript)…"
+        onfocus="this.style.borderColor='var(--primary)'"
+        onblur="this.style.borderColor='var(--border)'"></textarea>
+      <button onclick="importYouTube()"
+        style="width:100%;padding:.55rem;background:var(--danger);color:#fff;border:none;border-radius:8px;
+               font-size:.85rem;font-family:sans-serif;font-weight:600;transition:background .15s"
+        onmouseover="this.style.background='#b91c1c'"
+        onmouseout="this.style.background='var(--danger)'">▶ Import Video</button>
+      <div class="upload-status" id="ytStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- LANGUAGE SCREEN -->
+<div id="langScreen" class="screen active">
+  <div style="text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:.5rem">📰</div>
+    <h1>LinguaNews</h1>
+    <p style="margin-top:.5rem">Learn languages through quality journalism. Choose your language.</p>
+  </div>
+  <div class="lang-cards">
+    <div class="lang-card" onclick="selectLang('en')">
+      <div class="flag">🇬🇧</div><div class="lname">English</div><div class="lsub">Read quality English journalism</div>
+    </div>
+    <div class="lang-card" onclick="selectLang('fr')">
+      <div class="flag">🇫🇷</div><div class="lname">Français</div><div class="lsub">Lisez de la presse française</div>
+    </div>
+    <div class="lang-card" onclick="selectLang('ko')">
+      <div class="flag">🇰🇷</div><div class="lname">한국어</div><div class="lsub">한국어로 읽고 배우세요</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOPIC SCREEN -->
+<div id="topicScreen" class="screen" style="flex-direction:column">
+  <div style="padding:1.5rem 2rem .5rem;display:flex;align-items:center;gap:1rem">
+    <button class="back-btn" onclick="goLang()">← Back</button>
+    <span id="topicLangBadge" style="font-family:sans-serif;font-size:.82rem;color:var(--muted)"></span>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 2rem 3rem">
+    <div class="topic-header">
+      <div style="font-size:2rem;margin-bottom:.5rem">🗞️</div>
+      <h2 id="topicHeading">What would you like to read today?</h2>
+      <p id="topicSub">Choose a topic — we'll select the best article for you</p>
+    </div>
+    <div class="topics-grid" id="topicsGrid"></div>
+  </div>
+</div>
+
+<!-- READER SCREEN -->
+<div id="readerScreen" class="screen" style="flex-direction:column;height:100vh;overflow:hidden">
+  <div class="reader-nav">
+    <span class="nav-brand">📰 LinguaNews</span>
+    <span class="nav-lang" id="navLang"></span>
+    <div class="nav-spacer"></div>
+    <button class="nav-btn accent" onclick="openUpload()">⬆ Upload</button>
+    <button class="nav-btn" onclick="goTopics()" style="margin-left:.4rem">Change Topic</button>
+    <button class="nav-btn" onclick="goLang()" style="margin-left:.3rem">Switch Language</button>
+  </div>
+  <div class="reader-layout">
+    <!-- LEFT -->
+    <div class="left-panel">
+      <div class="panel-hdr"><h3>Study History</h3></div>
+      <div class="hist-list" id="histList"></div>
+    </div>
+    <!-- CENTER -->
+    <div class="center-panel" id="articlePane"></div>
+    <!-- RIGHT -->
+    <div class="right-panel">
+      <div class="panel-hdr">
+        <h3>My Dictionary</h3>
+        <span class="vocab-badge" id="vocabCnt">0</span>
+      </div>
+      <div class="vocab-input-area">
+        <div class="vocab-row">
+          <input class="vocab-input" id="vocabInput" placeholder="Add a word…" onkeydown="if(event.key==='Enter')addFromInput()"/>
+          <button class="vocab-add-btn" onclick="addFromInput()">+</button>
+        </div>
+        <div class="vocab-hint" id="vocabHint">Click any word in the article to translate it</div>
+      </div>
+      <div class="vocab-list" id="vocabPane"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ════════════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════════════
+const TOPICS = {
+  en:[
+    {id:'technology',icon:'💻',name:'Technology',desc:'AI, gadgets & the digital world'},
+    {id:'science',icon:'🔬',name:'Science',desc:'Discoveries & research'},
+    {id:'culture',icon:'🎭',name:'Culture',desc:'Arts, film & society'},
+    {id:'business',icon:'📈',name:'Business',desc:'Economy & markets'},
+    {id:'health',icon:'🏥',name:'Health',desc:'Medicine & wellness'},
+    {id:'environment',icon:'🌿',name:'Environment',desc:'Climate & nature'},
+  ],
+  fr:[
+    {id:'technology',icon:'💻',name:'Technologie',desc:'IA, gadgets & numérique'},
+    {id:'science',icon:'🔬',name:'Sciences',desc:'Découvertes & recherche'},
+    {id:'culture',icon:'🎭',name:'Culture',desc:'Arts, cinéma & société'},
+    {id:'business',icon:'📈',name:'Économie',desc:'Marchés & entreprises'},
+    {id:'health',icon:'🏥',name:'Santé',desc:'Médecine & bien-être'},
+    {id:'environment',icon:'🌿',name:'Environnement',desc:'Climat & nature'},
+  ],
+  ko:[
+    {id:'technology',icon:'💻',name:'기술',desc:'AI, 디지털 & 혁신'},
+    {id:'science',icon:'🔬',name:'과학',desc:'발견 & 연구'},
+    {id:'culture',icon:'🎭',name:'문화',desc:'예술, 영화 & 사회'},
+    {id:'business',icon:'📈',name:'경제',desc:'시장 & 기업'},
+    {id:'health',icon:'🏥',name:'건강',desc:'의학 & 웰빙'},
+    {id:'environment',icon:'🌿',name:'환경',desc:'기후 & 자연'},
+  ]
+};
+
+const ARTICLES = {
+  en:{
+    technology:[
+      {id:'en-t1',topic:'Technology',
+       title:'Artificial Intelligence Reshapes the Modern Workplace',
+       sub:'As AI tools become commonplace, companies worldwide are reimagining how work gets done — and what skills will be most valuable in the decade ahead.',
+       body:[
+        'Across industries from finance to healthcare, artificial intelligence is quietly transforming the way organisations operate. What once seemed the domain of science fiction has become a practical reality: algorithms draft reports, machine-learning systems diagnose diseases, and conversational AI handles customer queries around the clock.',
+        'The pace of adoption has accelerated dramatically since the release of large language models capable of nuanced reasoning. Businesses that were cautious about technology investment now find themselves compelled to integrate AI tools simply to remain competitive. A recent survey found that 72 per cent of organisations had adopted at least one AI capability in the past year, up from 55 per cent two years prior.',
+        'Yet alongside the enthusiasm, a more measured conversation is emerging. Workers worry about displacement, while economists debate whether AI will create more jobs than it destroys. Historical analogies abound: the Industrial Revolution, the advent of the personal computer, the rise of the internet. Each disruption ultimately generated new categories of employment, though the transition was rarely painless.',
+        '"The question is not whether AI will change work," says Dr Elena Marchetti, a labour economist at the London School of Economics. "The question is how quickly institutions — governments, universities, companies — can adapt their training and support systems to help people navigate the change."',
+        'The most visible shifts are in what economists call knowledge work. Legal associates use AI to review contracts in minutes rather than days. Architects generate dozens of design iterations in the time it once took to sketch one. Journalists employ AI to sift through large datasets, surfacing stories that might otherwise remain buried.',
+        'The consensus among researchers is that hybrid roles — those combining human judgement with AI efficiency — will define the next decade of work. The workers who thrive will be those who learn to direct, interrogate, and critically evaluate AI outputs, rather than simply delegate to them.',
+       ],wc:280,rt:'4 min'},
+      {id:'en-t2',topic:'Technology',
+       title:'The Race to Build Quantum Computers Heats Up',
+       sub:'Tech giants and startups alike are pouring billions into quantum computing — a technology that promises to solve problems beyond the reach of any classical machine.',
+       body:[
+        'In laboratories from California to Cambridge, physicists and engineers are locked in an extraordinary race. Their goal: to build a quantum computer powerful enough to perform calculations that would take today\'s fastest supercomputers thousands of years to complete.',
+        'Unlike classical computers, which store information as binary digits — ones and zeros — quantum machines exploit the peculiar properties of quantum mechanics. Quantum bits, or qubits, can exist in multiple states simultaneously, a phenomenon known as superposition. They can also become entangled, meaning the state of one qubit instantaneously influences another, regardless of distance.',
+        'These properties give quantum computers the potential to process vast amounts of information in parallel. For certain classes of problem — particularly those involving optimisation or the simulation of molecular interactions — they may prove exponentially faster than classical machines.',
+        'The leading contenders include IBM, Google, Microsoft, and a host of well-funded start-ups. In 2019, Google claimed quantum supremacy after its processor completed a specific calculation in 200 seconds that would have taken a classical supercomputer approximately 10,000 years.',
+        'Significant challenges remain. Today\'s quantum systems are highly susceptible to errors caused by environmental interference — a problem known as decoherence. Most machines must operate at temperatures colder than outer space to minimise this effect, making them expensive and difficult to scale.',
+        'Despite these hurdles, experts believe fault-tolerant quantum computers could arrive within the next decade. When they do, the industries they transform may prove as numerous as those changed by the invention of the transistor.',
+       ],wc:250,rt:'4 min'},
+    ],
+    science:[{id:'en-s1',topic:'Science',
+      title:'A Breakthrough in Alzheimer\'s Research Offers New Hope',
+      sub:'Researchers have identified a novel mechanism underlying cognitive decline, opening potential pathways for treatments that target the disease at its root.',
+      body:[
+        'For decades, the prevailing theory of Alzheimer\'s disease has centred on two proteins: amyloid-beta, which forms plaques between nerve cells, and tau, which tangles within them. Despite enormous investment, clinical trials targeting these proteins have yielded disappointing results, and the disease remains without a cure.',
+        'Researchers at University College London and the Broad Institute have now identified a third culprit: chronic neuroinflammation driven by malfunctioning immune cells in the brain, known as microglia. In people with Alzheimer\'s, these cells appear to shift from a protective state to one that damages rather than defends neural tissue.',
+        '"We\'ve been so focused on plaques and tangles that we may have underestimated the role inflammation plays in driving the disease," said Professor James Whitfield. "The microglia aren\'t simply responding to damage — in many cases, they appear to be causing it."',
+        'The findings align with genetic research that has long implicated immune-related genes in Alzheimer\'s risk. Variants in a gene called TREM2, which regulates microglial activity, are among the strongest known genetic risk factors for late-onset Alzheimer\'s.',
+        'Several pharmaceutical companies have already begun developing drugs that modulate microglial function, and early-stage clinical trials are underway. Researchers caution that the path from biological insight to approved therapy is long and uncertain.',
+        'But the emerging picture of Alzheimer\'s as, in part, an inflammatory disease opens a new front in the fight against a condition affecting tens of millions of people worldwide — and may finally explain why so many amyloid-focused drugs have failed.',
+      ],wc:260,rt:'4 min'}],
+    culture:[{id:'en-c1',topic:'Culture',
+      title:'The Renaissance of Independent Bookshops',
+      sub:'Defying predictions of their demise, independent bookshops are not merely surviving the digital age — in many cities, they are flourishing.',
+      body:[
+        'When Amazon launched its online marketplace in the late 1990s, many predicted that the independent bookshop was finished. The logic seemed irrefutable: who would pay full price for a book in a cramped shop when they could order it from home at a discount and have it delivered the next day?',
+        'According to the Booksellers Association, the number of independent bookshops in the United Kingdom has grown steadily for the past several years, reversing a long decline. In the United States, the American Booksellers Association reported that its membership has more than doubled since 2009.',
+        'What explains the revival? Owners and industry observers point to several intersecting factors. The pandemic accelerated a broader cultural shift towards supporting local businesses, and bookshops benefited from a surge in reading as people searched for meaning and solace during periods of isolation.',
+        'But the resurgence runs deeper than a pandemic-era trend. Independent bookshops have found a powerful identity as community hubs — places that host author events, children\'s story hours, book clubs, and philosophical discussion groups.',
+        '"People don\'t just come here to buy books," says Clara Holt, who opened a shop in Edinburgh three years ago. "They come to browse, to talk about what they\'ve read, to feel part of something. That\'s not something an app can give you."',
+        'The economics remain precarious — margins in bookselling have always been slim — but the cultural appetite for physical books and the places that sell them appears more durable than the doom-mongers supposed.',
+      ],wc:248,rt:'4 min'}],
+    business:[{id:'en-b1',topic:'Business',
+      title:'Central Banks Navigate the Delicate Path to Lower Interest Rates',
+      sub:'After a period of aggressive rate rises to tame inflation, monetary policymakers face the complex task of easing policy without reigniting price pressures.',
+      body:[
+        'The global campaign to bring inflation under control through sharply higher interest rates has achieved much of what policymakers intended. Consumer price growth, which surged to multi-decade highs in 2022 and 2023, has retreated significantly in most major economies.',
+        'The Federal Reserve, the European Central Bank, and the Bank of England have all signalled a cautious approach to rate reductions. Inflation, though lower, has not returned uniformly to the 2 per cent targets that most central banks consider consistent with price stability. Services inflation has proved stubbornly persistent.',
+        '"We want to be confident that inflation is sustainably returning to target before we ease significantly," said one senior policymaker. "Acting too early risks undoing the progress we have made. Acting too late risks unnecessary economic weakness."',
+        'The dilemma is familiar in monetary policy history. In the 1970s and early 1980s, central banks prematurely declared victory over inflation, only to see it resurge. That experience has cast a long shadow over today\'s policymakers.',
+        'Financial markets, however, are impatient. Investors who anticipated rapid rate cuts have repeatedly had to revise their expectations, and the uncertainty has contributed to volatility in bond and equity markets.',
+        'Meanwhile, the real-world costs of elevated borrowing costs are mounting. Businesses face higher financing expenses, consumers with variable-rate mortgages are squeezed, and governments carrying large debt burdens pay more in interest. The balance between managing inflation and supporting economic activity is, as ever, exceedingly fine.',
+      ],wc:250,rt:'4 min'}],
+    health:[{id:'en-h1',topic:'Health',
+      title:'The Science of Sleep: Why Rest Is More Important Than We Thought',
+      sub:'Research over the past decade has revealed sleep to be a biological necessity of the first order, with consequences for brain health, immunity, and longevity.',
+      body:[
+        'For much of history, sleep was viewed as a passive state — a necessary interlude in the active business of living, but of little intrinsic interest to science. That view has been thoroughly overturned. Sleep research has emerged as one of the most dynamic fields in medicine, revealing that the hours spent unconscious are among the most biologically productive of the day.',
+        'Perhaps the most striking discovery concerns the brain\'s cleaning system. During sleep, the glymphatic system — a network of channels surrounding blood vessels in the brain — becomes dramatically more active, flushing out metabolic waste products, including proteins associated with Alzheimer\'s disease.',
+        '"Sleep is not a luxury or an optional extra," says Dr Matthew Walker, a neuroscientist. "It is a non-negotiable biological necessity, and the consequences of neglecting it are severe and far-reaching."',
+        'The evidence supports this. Studies have linked insufficient sleep to increased risk of cardiovascular disease, type 2 diabetes, obesity, depression, and impaired immune function. People who consistently sleep fewer than six hours per night face a significantly elevated risk of premature death.',
+        'Despite this, sleep deprivation remains epidemic in many countries. Cultural attitudes that celebrate long working hours and short nights have resisted scientific evidence. The average adult sleeps considerably less than the seven to nine hours recommended for optimal health.',
+        'The good news is that sleep quality can often be improved through relatively straightforward changes: consistent sleep and wake times, a cool and dark bedroom, and limiting exposure to screens in the hour before bed.',
+      ],wc:252,rt:'4 min'}],
+    environment:[{id:'en-e1',topic:'Environment',
+      title:'Rewilding Europe: Nature\'s Remarkable Powers of Recovery',
+      sub:'In regions where intensive farming and industry have retreated, wildlife is returning with surprising speed — offering lessons for conservation globally.',
+      body:[
+        'In the Carpathian Mountains of Romania, wolves and brown bears move through forests that have regenerated on former agricultural land. In the Dutch lowlands, herds of wild horses and cattle roam wetlands that were once intensively farmed fields.',
+        'Rewilding, at its most ambitious, involves stepping back from intensive land management and allowing ecological processes to reassert themselves. It typically focuses on restoring natural water flows, reintroducing keystone species, and reducing the fragmentation of habitats.',
+        'The evidence from existing projects is striking. Studies of areas in Europe where human pressure has reduced show that biodiversity can recover faster than pessimistic models predicted.',
+        '"What we\'re seeing challenges the idea that extinction is the only direction of travel," says Isabella Tree. "Species we thought were gone are coming back, and in doing so, they\'re restoring ecological functions we didn\'t even know we\'d lost."',
+        'The reintroduction of wolves to Yellowstone National Park demonstrated how a single apex predator could reshape a landscape — reducing overgrazing by deer, allowing riverbanks to stabilise, and enabling forests to recover.',
+        'Rewilding is not without controversy. Farmers whose livelihoods depend on the land often regard proposals to reintroduce predators with alarm. Striking a balance between the needs of ecosystems and the needs of rural communities is among the central challenges facing the movement.',
+      ],wc:240,rt:'4 min'}],
+  },
+  ko:{technology:[],science:[],culture:[],business:[],health:[],environment:[]},
+  fr:{
+    technology:[{id:'fr-t1',topic:'Technologie',
+      title:"L'intelligence artificielle redéfinit le monde du travail",
+      sub:"À mesure que les outils d'IA se généralisent, les entreprises repensent leur fonctionnement — et les compétences qui seront les plus précieuses dans la prochaine décennie.",
+      body:[
+        "Dans des secteurs aussi variés que la finance, la santé ou le droit, l'intelligence artificielle transforme silencieusement la façon dont les organisations fonctionnent. Ce qui semblait encore relever de la science-fiction est devenu une réalité concrète : des algorithmes rédigent des rapports, des systèmes d'apprentissage automatique diagnostiquent des maladies, et des assistants conversationnels traitent les demandes des clients à toute heure.",
+        "Le rythme d'adoption s'est accéléré depuis la mise à disposition des grands modèles de langage. Des entreprises qui se montraient autrefois prudentes en matière d'investissement technologique se voient contraintes d'intégrer des outils d'IA pour rester compétitives. Une récente enquête révèle que 72 % des organisations ont adopté au moins une capacité d'IA au cours de l'année écoulée.",
+        "Pourtant, à côté de l'enthousiasme, une réflexion plus mesurée s'impose. Les travailleurs s'inquiètent des suppressions de postes, tandis que les économistes débattent de la question de savoir si l'IA créera davantage d'emplois qu'elle n'en détruira. Les analogies historiques abondent : la révolution industrielle, l'avènement de l'ordinateur personnel, l'essor d'Internet.",
+        "« La question n'est pas de savoir si l'IA va transformer le travail, déclare la Dre Elena Marchetti, économiste du travail. La question est de savoir à quelle vitesse les institutions — gouvernements, universités, entreprises — pourront adapter leurs systèmes de formation. »",
+        "Pour l'heure, les mutations les plus visibles touchent le travail de la connaissance. Des collaborateurs juridiques utilisent l'IA pour examiner des contrats en quelques minutes plutôt qu'en quelques jours. Des architectes génèrent des dizaines de variantes dans le temps qu'il fallait pour esquisser une seule idée.",
+        "Le consensus entre chercheurs est que les rôles hybrides — ceux combinant le jugement humain et l'efficacité de l'IA — définiront la prochaine décennie professionnelle. Les travailleurs qui s'épanouiront seront ceux qui apprendront à diriger et évaluer de manière critique les productions de l'IA.",
+      ],wc:275,rt:'5 min'}],
+    science:[{id:'fr-s1',topic:'Sciences',
+      title:"Une avancée majeure dans la recherche sur la mémoire",
+      sub:"Des neuroscientifiques ont identifié de nouveaux mécanismes régissant la consolidation de la mémoire, ouvrant des perspectives thérapeutiques pour les troubles cognitifs.",
+      body:[
+        "Comment le cerveau transforme-t-il une expérience fugace en un souvenir durable ? Cette question, centrale en neurosciences depuis des décennies, vient de connaître un développement significatif. Une équipe internationale a identifié un réseau de neurones jouant un rôle crucial dans la consolidation des souvenirs.",
+        "L'étude, publiée dans Nature Neuroscience, s'est appuyée sur des techniques d'imagerie cérébrale à haute résolution. Les chercheurs ont découvert que l'hippocampe interagit avec le cortex préfrontal de manière beaucoup plus dynamique qu'on ne le supposait.",
+        "« Nous pensions que la consolidation mnésique était essentiellement un processus de nuit, explique le Pr Antoine Lemaire. Ce que nous découvrons, c'est que des échanges actifs se produisent tout au long de la journée, en réponse à certains signaux environnementaux. »",
+        "Cette découverte pourrait avoir des implications importantes pour la compréhension et le traitement de troubles comme la maladie d'Alzheimer, l'amnésie post-traumatique et d'autres formes de déficience mémorielle.",
+        "Des essais cliniques préliminaires explorant des interventions basées sur ces mécanismes sont déjà en cours dans plusieurs centres hospitaliers européens. Si les résultats s'avèrent concluants, ils pourraient déboucher sur de nouvelles approches thérapeutiques.",
+        "Pour l'heure, les scientifiques appellent à la prudence : le chemin entre la compréhension d'un mécanisme biologique et le développement d'un traitement efficace est long et semé d'embûches.",
+      ],wc:260,rt:'5 min'}],
+    culture:[{id:'fr-c1',topic:'Culture',
+      title:"Le cinéma français à la conquête du monde",
+      sub:"Porté par les plateformes de streaming et un renouveau créatif, le cinéma français attire de nouveaux publics bien au-delà de ses frontières traditionnelles.",
+      body:[
+        "Il fut un temps où le cinéma français semblait replié sur lui-même. Ce temps paraît révolu. Des séries comme Lupin, des films primés aux festivals internationaux, ont démontré que la production audiovisuelle française pouvait conquérir des publics bien au-delà des frontières hexagonales.",
+        "Les chiffres de diffusion sur les grandes plateformes numériques témoignent de cette transformation. Netflix et Amazon Prime ont ouvert des marchés jadis inaccessibles : un spectateur de Séoul ou de São Paulo peut désormais découvrir une comédie parisienne avec la même facilité qu'une production américaine.",
+        "Cette ouverture n'est pas le fruit du hasard. Le Centre national du cinéma a adapté ses mécanismes de financement pour encourager les coproductions internationales et la diffusion numérique. Des accords ont été conclus avec plusieurs grands acteurs du streaming.",
+        "« Ce qui change, c'est que la diversité culturelle n'est plus perçue comme un obstacle à la diffusion, mais comme un atout, explique Sophie Morin, directrice de distribution. Les spectateurs sont de plus en plus curieux de contenus qui leur montrent des vies différentes des leurs. »",
+        "Les jeunes cinéastes français semblent avoir intégré cette réalité. Une nouvelle génération de réalisateurs — plus diverse, plus audacieuse — produit des œuvres qui dialoguent avec les préoccupations globales tout en restant profondément françaises.",
+        "Les défis demeurent : la concurrence des productions américaines reste écrasante en termes de budget et de moyens marketing. Mais l'appétit pour les histoires françaises semble plus vif que jamais.",
+      ],wc:255,rt:'5 min'}],
+    business:[{id:'fr-b1',topic:'Économie',
+      title:"Les banques centrales face au défi de la baisse des taux",
+      sub:"Après une période de hausses agressives pour maîtriser l'inflation, les décideurs monétaires doivent naviguer prudemment vers un assouplissement de leur politique.",
+      body:[
+        "La campagne mondiale de lutte contre l'inflation par des hausses de taux a largement atteint ses objectifs. La hausse des prix à la consommation, qui avait atteint des sommets inédits depuis plusieurs décennies, a reflué de manière significative dans la plupart des grandes économies.",
+        "La Réserve fédérale américaine, la Banque centrale européenne et la Banque d'Angleterre ont toutes signalé une approche prudente. L'inflation, bien qu'en recul, n'a pas encore retrouvé les objectifs de 2 % considérés comme compatibles avec la stabilité des prix.",
+        "« Nous souhaitons avoir la certitude que l'inflation revient durablement vers notre objectif avant d'assouplir significativement notre politique », a déclaré un haut responsable. « Agir trop tôt risque d'annuler les progrès accomplis. Agir trop tard risque de fragiliser inutilement l'économie. »",
+        "Ce dilemme est familier dans l'histoire de la politique monétaire. Dans les années 1970, les banques centrales avaient prématurément proclamé la victoire sur l'inflation. Cette expérience hante toujours les décideurs actuels.",
+        "Les marchés financiers, eux, se montrent impatients. Les investisseurs qui anticipaient des baisses de taux rapides ont dû réviser leurs anticipations à plusieurs reprises, contribuant à une volatilité accrue.",
+        "Les coûts réels de taux d'emprunt élevés se font de plus en plus sentir. Les entreprises font face à des charges de financement alourdies, les ménages voient leur pouvoir d'achat rogné, et les États supportent une charge d'intérêts croissante.",
+      ],wc:255,rt:'5 min'}],
+    health:[{id:'fr-h1',topic:'Santé',
+      title:"La science du sommeil : pourquoi dormir est vital",
+      sub:"La recherche des dernières décennies a révélé que le sommeil est une nécessité biologique fondamentale, aux conséquences profondes sur la santé cérébrale et la longévité.",
+      body:[
+        "Pendant longtemps, le sommeil fut considéré comme un état passif. Cette vision a été radicalement remise en cause. La recherche sur le sommeil a émergé comme l'un des domaines les plus dynamiques de la médecine, révélant que les heures passées dans l'inconscience sont parmi les plus biologiquement productives.",
+        "La découverte la plus frappante concerne le système de nettoyage du cerveau. Durant le sommeil, le système glymphatique devient beaucoup plus actif, évacuant les déchets métaboliques, notamment des protéines associées à la maladie d'Alzheimer.",
+        "« Le sommeil n'est pas un luxe ni une option, souligne le Dr Matthew Walker, neuroscientifique. C'est une nécessité biologique non négociable, et les conséquences de sa négligence sont graves et étendues. »",
+        "De nombreuses études associent un sommeil insuffisant à un risque accru de maladies cardiovasculaires, de diabète de type 2, d'obésité, de dépression et d'une fonction immunitaire affaiblie. Les personnes dormant moins de six heures présentent un risque élevé de décès prématuré.",
+        "Pourtant, la privation de sommeil reste épidémique dans de nombreux pays. Les attitudes culturelles qui valorisent les longues heures de travail ont résisté aux données scientifiques.",
+        "La bonne nouvelle est que la qualité du sommeil peut souvent être améliorée grâce à des changements simples : horaires réguliers, chambre fraîche et sombre, et limitation de l'exposition aux écrans avant le coucher.",
+      ],wc:255,rt:'5 min'}],
+    environment:[{id:'fr-e1',topic:'Environnement',
+      title:"Le rewilding en Europe : quand la nature reprend ses droits",
+      sub:"Dans les régions où l'agriculture intensive a reculé, la faune revient avec une vitesse surprenante — offrant des leçons précieuses pour la conservation mondiale.",
+      body:[
+        "Dans les Carpates roumaines, des loups et des ours bruns sillonnent des forêts qui ont repris vie sur d'anciens terrains agricoles. Dans les plaines néerlandaises, des troupeaux de chevaux sauvages parcourent des zones humides qui étaient naguère des champs cultivés.",
+        "Le rewilding consiste à réduire la gestion intensive des terres et à laisser les processus écologiques se rétablir. Il se concentre sur la restauration des flux naturels d'eau, la réintroduction d'espèces clés de voûte et la réduction de la fragmentation des habitats.",
+        "Les données issues des projets existants sont remarquables. Des études menées dans des zones d'Europe où la pression humaine a diminué montrent que la biodiversité peut se rétablir plus rapidement que ne le prédisaient les modèles pessimistes.",
+        "« Ce que nous observons remet en question l'idée que l'extinction est le seul horizon possible, explique Isabella Tree. Des espèces que l'on croyait disparues reviennent, et ce faisant, elles restaurent des fonctions écologiques dont nous avions oublié l'existence. »",
+        "La réintroduction des loups dans le parc de Yellowstone a démontré comment un prédateur au sommet de la chaîne alimentaire pouvait remodeler un paysage entier — réduisant le surpâturage, stabilisant les berges et permettant aux forêts de se régénérer.",
+        "Le rewilding ne va pas sans controverses. Les agriculteurs voient avec inquiétude les propositions de réintroduction de prédateurs. Trouver un équilibre entre les besoins des écosystèmes et ceux des communautés rurales reste l'un des défis centraux du mouvement.",
+      ],wc:252,rt:'5 min'}],
+  }
+};
+
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+const S = {
+  lang: null,
+  article: null,
+  vocab: [],
+  history: [],
+  // audio
+  playing: false,
+  rate: 1.0,
+  audioFileURL: null,   // object URL for uploaded audio
+  audioEl: null,        // HTMLAudioElement
+  progInterval: null,
+  // translation
+  transWord: '',
+  transResult: '',
+  transCache: {},
+  // selection tooltip
+  selTimer: null,
+};
+
+function loadPersisted(){
+  try{
+    const v=localStorage.getItem('ln_vocab'); if(v) S.vocab=JSON.parse(v);
+    const h=localStorage.getItem('ln_hist');  if(h) S.history=JSON.parse(h);
+  }catch(_){}
+}
+function saveVocab(){ localStorage.setItem('ln_vocab',JSON.stringify(S.vocab)); }
+function saveHist(){  localStorage.setItem('ln_hist', JSON.stringify(S.history)); }
+
+// ════════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════════
+function showScreen(id){
+  ['langScreen','topicScreen','readerScreen'].forEach(s=>
+    document.getElementById(s).classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goLang(){ stopAudio(); showScreen('langScreen'); }
+function selectLang(l){ S.lang=l; goTopics(); }
+/* L(en, fr, ko) — pick string for current language */
+function L(en,fr,ko){ return S.lang==='fr'?fr:S.lang==='ko'?(ko||en):en; }
+
+function goTopics(){
+  stopAudio();
+  document.getElementById('topicLangBadge').textContent=L('🇬🇧 English','🇫🇷 Français','🇰🇷 한국어');
+  document.getElementById('topicHeading').textContent=L("What would you like to read today?","Que souhaitez-vous lire aujourd'hui ?","오늘 무엇을 읽으시겠어요?");
+  document.getElementById('topicSub').textContent=L("Choose a topic — we'll select the best article for you","Choisissez un sujet — nous vous trouverons l'article idéal","주제를 선택하세요");
+  const g=document.getElementById('topicsGrid'); g.innerHTML='';
+  TOPICS[S.lang].forEach(t=>{
+    const d=document.createElement('div'); d.className='topic-card';
+    d.innerHTML=`<div class="ticon">${t.icon}</div><div class="tname">${t.name}</div><div class="tdesc">${t.desc}</div>`;
+    d.onclick=()=>selectTopic(t.id); g.appendChild(d);
+  });
+  showScreen('topicScreen');
+}
+function selectTopic(tid){
+  const pool=ARTICLES[S.lang][tid]||[];
+  if(!pool.length){ showImportPrompt(tid); return; }
+  S.article=pool[new Date().getDate()%pool.length];
+  S.ytVideoId=null; S.ytTimestamps=[];
+  recordHistory(); renderReader(); showScreen('readerScreen');
+}
+function showImportPrompt(tid){
+  const topicName=(TOPICS[S.lang]||[]).find(t=>t.id===tid)?.name||tid;
+  S.article={
+    id:'placeholder-'+tid, topic:topicName,
+    title:L('Import your content','Importez votre contenu','콘텐츠를 가져오세요'),
+    sub:L('Upload a text file, paste an article, or import from YouTube below.',
+         'Importez un fichier texte, collez un article ou importez depuis YouTube.',
+         '텍스트 파일을 업로드하거나 YouTube 링크를 가져오세요.'),
+    body:[L(
+      'No articles yet for this topic. Click ⬆ Upload in the top bar to paste text, upload a file, or import a YouTube video transcript.',
+      'Aucun article pour ce sujet. Cliquez sur ⬆ Upload pour importer du contenu.',
+      '아직 기사가 없습니다. 상단의 ⬆ Upload 버튼을 눌러 텍스트를 붙여넣거나 YouTube 링크를 가져오세요.')],
+    wc:30,rt:'1 min'
+  };
+  S.ytVideoId=null; S.ytTimestamps=[];
+  recordHistory(); renderReader(); showScreen('readerScreen');
+  setTimeout(openUpload,350);
+}
+
+// ════════════════════════════════════════════════════════════
+// READER RENDER
+// ════════════════════════════════════════════════════════════
+function renderReader(){
+  const a=S.article, en=S.lang==='en';
+  document.getElementById('navLang').textContent=L('🇬🇧 English','🇫🇷 Français','🇰🇷 한국어');
+  document.getElementById('vocabHint').textContent=L('Click any word to translate it','Cliquez sur un mot pour le traduire','단어를 클릭하면 번역됩니다');
+
+  const locale=S.lang==='ko'?'ko-KR':en?'en-GB':'fr-FR';
+  const dateStr=new Date().toLocaleDateString(locale,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Wrap each word in a span for click-to-translate
+  // For Korean, wrap on character clusters too
+  const bodyHTML=a.body.map(para=>{
+    const wrapped=para.replace(/(\S+)/g,(w)=>{
+      const clean=w.replace(/[^a-zA-ZÀ-ÿÀ-ž가-힣ㄱ-ㅎㅏ-ㅣ''-]/g,'');
+      return clean.length>0
+        ?`<span class="cw" data-w="${esc(clean)}">${esc(w)}</span>`
+        :esc(w);
+    });
+    return `<p>${wrapped}</p>`;
+  }).join('');
+
+  const ytBadge=S.ytVideoId?`<span class="art-badge" style="background:#fee2e2;color:#dc2626">▶ YouTube</span>`:'';
+  const ytEmbed=S.ytVideoId?`
+  <a href="https://www.youtube.com/watch?v=${S.ytVideoId}" target="_blank" rel="noopener"
+     style="display:block;position:relative;border-radius:10px;overflow:hidden;margin-bottom:1.2rem;text-decoration:none;background:#000">
+    <img src="https://img.youtube.com/vi/${S.ytVideoId}/hqdefault.jpg"
+         style="width:100%;display:block;opacity:.9" loading="lazy"/>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+      <div style="width:68px;height:48px;background:#f00;border-radius:12px;display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" width="28" height="28"><path d="M8 5v14l11-7z" fill="#fff"/></svg>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;
+                font-size:.75rem;font-family:sans-serif;padding:.4rem .7rem;text-align:center">
+      ▶ Watch on YouTube
+    </div>
+  </a>`:'';
+
+
+  document.getElementById('articlePane').innerHTML=`
+<div class="article-card">
+  <div class="art-meta">
+    ${ytBadge}<span class="art-badge">${esc(a.topic)}</span>
+    <span class="art-date">${dateStr}</span>
+    <span class="art-date">· ${a.wc} ${L('words','mots','단어')} · ${a.rt}</span>
+  </div>
+  <h1 class="art-title">${esc(a.title)}</h1>
+  <p class="art-sub">${esc(a.sub)}</p>
+  ${ytEmbed}
+  <div class="audio-player" id="audioPlayer" ${S.ytVideoId?'style="display:none"':''}>
+    <button class="play-btn" id="playBtn" onclick="toggleAudio()">
+      <svg id="playIco" width="18" height="18" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <div class="audio-info">
+      <div class="audio-lbl" id="audioLbl">${L('Listen to this article','Écouter cet article','이 기사 듣기')}</div>
+      <div class="audio-bar"><div class="audio-fill" id="audioFill"></div></div>
+      <div class="audio-file-name" id="audioFileName"></div>
+    </div>
+    <button class="speed-btn" id="speedBtn" onclick="cycleRate()">${S.rate}×</button>
+  </div>
+  <button class="shadow-launch" onclick="openShadowing()">🎙 ${L('Start Shadowing Practice','Commencer le shadowing','섀도잉 연습 시작')}</button>
+  <div class="art-body" id="artBody">${bodyHTML}</div>
+  <div class="art-tip" style="justify-content:space-between">
+    <span>💡 ${L('Click any word to translate it · select text to add a phrase','Cliquez sur un mot pour le traduire · sélectionnez du texte','단어를 클릭해 번역 · 텍스트를 선택해 사전에 추가')}</span>
+    <button class="edit-format-btn" onclick="openReformat()">✏️ ${L('Edit Format','Modifier','형식 편집')}</button>
+  </div>
+</div>`;
+
+  // Word click → translate
+  document.getElementById('artBody').addEventListener('click', onWordClick);
+  // Text selection → add phrase tooltip
+  document.getElementById('artBody').addEventListener('mouseup', onTextSelect);
+
+  renderVocab();
+  renderHist();
+  updatePlayBtn();
+  if(S.audioFileURL) showAudioFileName();
+}
+
+// ════════════════════════════════════════════════════════════
+// AUDIO — dual mode (TTS + file)
+// ════════════════════════════════════════════════════════════
+function toggleAudio(){ S.playing ? stopAudio() : startAudio(); }
+
+function startAudio(){
+  stopAudio();
+  if(S.audioFileURL){
+    startFileAudio();
+  } else {
+    startTTS();
+  }
+}
+
+/* — File audio — */
+function startFileAudio(){
+  if(!S.audioEl){ S.audioEl=new Audio(); }
+  S.audioEl.src=S.audioFileURL;
+  S.audioEl.playbackRate=S.rate;
+  S.audioEl.ontimeupdate=()=>{
+    if(!S.audioEl.duration) return;
+    const pct=S.audioEl.currentTime/S.audioEl.duration*100;
+    setFill(pct);
+    const rem=Math.max(0,Math.round(S.audioEl.duration-S.audioEl.currentTime));
+    setLbl(rem>0?`${fmtTime(rem)} ${S.lang==='en'?'remaining':'restant'}`:(S.lang==='en'?'Finished':'Terminé'));
+  };
+  S.audioEl.onended=()=>{ S.playing=false; updatePlayBtn(); setFill(100); };
+  S.audioEl.onerror=()=>{ S.playing=false; updatePlayBtn(); };
+  S.audioEl.play();
+  S.playing=true; updatePlayBtn();
+}
+
+function fmtTime(sec){
+  const m=Math.floor(sec/60), s=sec%60;
+  return m>0?`${m}:${String(s).padStart(2,'0')}`:`${s}s`;
+}
+
+/* — TTS — */
+function startTTS(){
+  if(!('speechSynthesis' in window)){ alert('Text-to-speech not supported in this browser.'); return; }
+  const text=S.article.body.join(' ');
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=S.lang==='en'?'en-GB':S.lang==='fr'?'fr-FR':'ko-KR';
+  u.rate=S.rate;
+  const voices=speechSynthesis.getVoices();
+  const pref=S.lang==='en'?'en':'fr';
+  u.voice=voices.find(v=>v.lang.startsWith(pref)&&v.localService)||
+           voices.find(v=>v.lang.startsWith(pref))||null;
+  const totalSec=(text.split(/\s+/).length/(160*S.rate))*60;
+  let elapsed=0;
+  u.onstart=()=>{
+    S.playing=true; updatePlayBtn();
+    clearInterval(S.progInterval);
+    S.progInterval=setInterval(()=>{
+      elapsed+=0.5;
+      setFill(Math.min(elapsed/totalSec*100,99));
+      const rem=Math.max(0,Math.round(totalSec-elapsed));
+      setLbl(`${fmtTime(rem)} ${S.lang==='en'?'remaining':'restant'}`);
+      if(!S.playing) clearInterval(S.progInterval);
+    },500);
+  };
+  u.onend=()=>{ S.playing=false; clearInterval(S.progInterval); updatePlayBtn(); setFill(100); setLbl(S.lang==='en'?'Finished':'Terminé'); };
+  u.onerror=()=>{ S.playing=false; clearInterval(S.progInterval); updatePlayBtn(); };
+  speechSynthesis.speak(u);
+}
+
+function stopAudio(){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  clearInterval(S.progInterval);
+  if(S.audioEl){ S.audioEl.pause(); S.audioEl.currentTime=0; }
+  S.playing=false; updatePlayBtn();
+}
+
+function cycleRate(){
+  const steps=[0.75,1.0,1.25,1.5];
+  S.rate=steps[(steps.indexOf(S.rate)+1)%steps.length];
+  const b=document.getElementById('speedBtn'); if(b) b.textContent=S.rate+'×';
+  if(S.audioEl) S.audioEl.playbackRate=S.rate;
+  if(S.playing&&!S.audioFileURL) startAudio(); // restart TTS with new rate
+}
+
+function updatePlayBtn(){
+  const ico=document.getElementById('playIco'); if(!ico) return;
+  ico.innerHTML=S.playing
+    ?'<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
+    :'<path d="M8 5v14l11-7z"/>';
+}
+function setFill(pct){ const f=document.getElementById('audioFill'); if(f) f.style.width=pct+'%'; }
+function setLbl(t){    const l=document.getElementById('audioLbl');  if(l) l.textContent=t; }
+function showAudioFileName(){
+  const el=document.getElementById('audioFileName');
+  if(el&&S.uploadedAudioName) el.textContent='🎵 '+S.uploadedAudioName;
+}
+
+// ════════════════════════════════════════════════════════════
+// TRANSLATION (MyMemory free API)
+// ════════════════════════════════════════════════════════════
+let _transWord='', _transResult='', _transPos={x:0,y:0};
+
+function onWordClick(e){
+  // If user was selecting text, don't intercept
+  const sel=window.getSelection();
+  if(sel&&sel.toString().trim().length>1) return;
+
+  const span=e.target.closest('.cw');
+  if(!span) return;
+  const word=span.dataset.w;
+  if(!word) return;
+
+  const rect=span.getBoundingClientRect();
+  showTransPopup(word, rect.left+rect.width/2, rect.bottom+window.scrollY+8);
+}
+
+function showTransPopup(word, x, y){
+  _transWord=word; _transResult='';
+  const pop=document.getElementById('transPop');
+  document.getElementById('tpWord').textContent=word;
+  document.getElementById('tpDir').textContent=L('→ French translation','→ Traduction en anglais','→ English translation');
+  document.getElementById('tpResult').innerHTML='<span class="tp-loading">Translating…</span>';
+  const btn=document.getElementById('tpAddBtn');
+  btn.textContent=L('+ Add to Dictionary','+ Ajouter au dictionnaire','+ 사전에 추가');
+  btn.disabled=false;
+
+  // Position popup (keep on screen)
+  pop.style.display='block';
+  pop.style.visibility='hidden';
+  pop.style.left='0'; pop.style.top='0';
+  // measure then position
+  requestAnimationFrame(()=>{
+    const pw=pop.offsetWidth, ph=pop.offsetHeight;
+    const vw=window.innerWidth;
+    let left=x-pw/2;
+    if(left<8) left=8;
+    if(left+pw>vw-8) left=vw-pw-8;
+    let top=y;
+    if(top+ph>window.innerHeight+window.scrollY-8) top=y-ph-span_height-20;
+    pop.style.left=left+'px';
+    pop.style.top=top+'px';
+    pop.style.visibility='visible';
+  });
+
+  // Fetch translation
+  const from=S.lang==='en'?'en':S.lang==='fr'?'fr':'ko';
+  const to=S.lang==='en'?'fr':'en';
+  const key=`${word}||${from}||${to}`;
+  if(S.transCache[key]){
+    showTransResult(S.transCache[key]);
+  } else {
+    fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=${from}|${to}`)
+      .then(r=>r.json())
+      .then(d=>{
+        const t=d.responseData?.translatedText||'—';
+        S.transCache[key]=t; showTransResult(t);
+      })
+      .catch(()=>showTransResult('—'));
+  }
+}
+
+// fallback if requestAnimationFrame doesn't have span height
+const span_height=20;
+
+function showTransResult(t){
+  _transResult=t;
+  document.getElementById('tpResult').textContent=t;
+}
+
+function closeTrans(){
+  document.getElementById('transPop').style.display='none';
+  _transWord=''; _transResult='';
+}
+
+function addTransToVocab(){
+  if(!_transWord) return;
+  addWord(_transWord, _transResult);
+  const btn=document.getElementById('tpAddBtn');
+  btn.textContent='✓ Added!';
+  btn.disabled=true;
+  setTimeout(closeTrans, 900);
+}
+
+// Close popup on outside click
+document.addEventListener('click', e=>{
+  const pop=document.getElementById('transPop');
+  if(pop.style.display==='block'&&!pop.contains(e.target)&&!e.target.classList.contains('cw')){
+    closeTrans();
+  }
+});
+
+// ════════════════════════════════════════════════════════════
+// SELECTION TOOLTIP (multi-word phrases → add to vocab)
+// ════════════════════════════════════════════════════════════
+function onTextSelect(e){
+  const sel=window.getSelection();
+  const txt=sel?sel.toString().trim():'';
+  if(!txt||txt.split(/\s+/).length<2||txt.length>120){ hideSelTip(); return; }
+  const range=sel.getRangeAt(0);
+  const rect=range.getBoundingClientRect();
+  const tip=document.getElementById('selTip');
+  const en=S.lang==='en';
+  tip.textContent=`+ Add phrase to dictionary`;
+  tip.style.display='block';
+  tip.style.left=(rect.left+rect.width/2-tip.offsetWidth/2)+'px';
+  tip.style.top=(rect.top+window.scrollY-38)+'px';
+  tip.onclick=()=>{ addWord(txt,''); hideSelTip(); sel.removeAllRanges(); };
+  clearTimeout(S.selTimer);
+  S.selTimer=setTimeout(hideSelTip,4000);
+}
+function hideSelTip(){ document.getElementById('selTip').style.display='none'; }
+document.addEventListener('mousedown',e=>{
+  if(!e.target.closest('#artBody')&&e.target.id!=='selTip') hideSelTip();
+});
+
+// ════════════════════════════════════════════════════════════
+// VOCABULARY / DICTIONARY
+// ════════════════════════════════════════════════════════════
+function addFromInput(){
+  const inp=document.getElementById('vocabInput');
+  const w=inp.value.trim(); if(!w) return;
+  addWord(w,''); inp.value='';
+}
+
+async function addWord(word, translation){
+  const existing=S.vocab.find(v=>v.w.toLowerCase()===word.toLowerCase()&&v.lang===S.lang);
+  if(existing){
+    if(translation&&!existing.t){ existing.t=translation; saveVocab(); renderVocab(); }
+    return;
+  }
+  const isPhrase=word.trim().includes(' ');
+  const item={id:Date.now(),w:word,t:translation||'',lang:S.lang,
+    date:new Date().toISOString(),def:'',pos:'',audioURL:'',loading:!isPhrase};
+  S.vocab.unshift(item);
+  saveVocab(); renderVocab();
+
+  if(!isPhrase){
+    const result=await fetchDefinition(word, S.lang);
+    const idx=S.vocab.findIndex(v=>v.id===item.id);
+    if(idx!==-1){
+      Object.assign(S.vocab[idx], result, {loading:false});
+      saveVocab(); renderVocab();
+    }
+  }
+}
+
+function delWord(id){
+  S.vocab=S.vocab.filter(v=>v.id!==id);
+  saveVocab(); renderVocab();
+}
+
+function renderVocab(){
+  const pane=document.getElementById('vocabPane');
+  const cnt =document.getElementById('vocabCnt');
+  if(!pane) return;
+  const list=S.vocab.filter(v=>v.lang===S.lang);
+  cnt.textContent=list.length;
+  if(!list.length){
+    pane.innerHTML=`<div class="vocab-empty">📚 ${L('Your dictionary is empty.<br>Click any word to translate & add it!','Votre dictionnaire est vide.<br>Cliquez sur un mot pour le traduire !','사전이 비어 있습니다.<br>단어를 클릭하면 번역 후 추가됩니다!')}</div>`;
+    return;
+  }
+  pane.innerHTML=list.map(v=>`
+    <div class="vocab-item">
+      <div class="vi-row1">
+        <div class="vi-left">
+          <span class="vocab-word">${esc(v.w)}</span>
+          ${v.pos?`<span class="vi-pos">${esc(v.pos)}</span>`:''}
+        </div>
+        <div class="vi-right">
+          <button class="vi-play" id="vplay-${v.id}" onclick="playVocabAudio(${v.id})" title="Play pronunciation">▶</button>
+          <button class="vocab-del" onclick="delWord(${v.id})">×</button>
+        </div>
+      </div>
+      ${v.t?`<div class="vocab-trans">→ ${esc(v.t)}</div>`:''}
+      ${v.def?`<div class="vocab-def">${esc(v.def)}</div>`:''}
+      ${v.loading?`<div class="vi-loading">Looking up definition…</div>`:''}
+    </div>`).join('');
+}
+
+/* ── Definition fetch (Free Dictionary API) ── */
+async function fetchDefinition(word, lang){
+  if(lang==='ko') return {def:'',pos:'',audioURL:''}; // dictionary API does not support Korean
+  try{
+    const r=await fetch(`https://api.dictionarapi.dev/api/v2/entries/${lang}/${encodeURIComponent(word.toLowerCase())}`);
+    if(!r.ok) return {def:'',pos:'',audioURL:''};
+    const data=await r.json();
+    if(!Array.isArray(data)||!data[0]) return {def:'',pos:'',audioURL:''};
+    const entry=data[0];
+    const meaning=entry.meanings?.[0];
+    const def=meaning?.definitions?.[0]?.definition||'';
+    const example=meaning?.definitions?.[0]?.example||'';
+    const pos=meaning?.partOfSpeech||'';
+    let audioURL=entry.phonetics?.find(p=>p.audio&&p.audio.length>0)?.audio||'';
+    if(audioURL.startsWith('//')) audioURL='https:'+audioURL;
+    return {def: def+(example?` — "${example}"`:''), pos, audioURL};
+  }catch(e){
+    return {def:'',pos:'',audioURL:''};
+  }
+}
+
+/* ── Vocab audio playback ── */
+let _vocabAudioEl=null;
+
+function playVocabAudio(id){
+  const v=S.vocab.find(x=>x.id===id); if(!v) return;
+  // Reset previous button
+  document.querySelectorAll('.vi-play').forEach(b=>{ b.classList.remove('active'); b.textContent='▶'; });
+  const btn=document.getElementById('vplay-'+id);
+
+  if(v.audioURL){
+    if(!_vocabAudioEl) _vocabAudioEl=new Audio();
+    _vocabAudioEl.src=v.audioURL;
+    if(btn){ btn.classList.add('active'); btn.textContent='■'; }
+    _vocabAudioEl.onended=()=>{ if(btn){ btn.classList.remove('active'); btn.textContent='▶'; } };
+    _vocabAudioEl.play().catch(()=>ttsSpeak(v.w, v.lang, btn));
+  } else {
+    ttsSpeak(v.w, v.lang, btn);
+  }
+}
+
+function ttsSpeak(text, lang, btn){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=lang==='en'?'en-GB':'fr-FR';
+  u.rate=0.85;
+  const voices=speechSynthesis.getVoices();
+  const pref=lang==='en'?'en':'fr';
+  u.voice=voices.find(v=>v.lang.startsWith(pref)&&v.localService)||voices.find(v=>v.lang.startsWith(pref))||null;
+  if(btn){ btn.classList.add('active'); btn.textContent='■'; }
+  u.onend=()=>{ if(btn){ btn.classList.remove('active'); btn.textContent='▶'; } };
+  speechSynthesis.speak(u);
+}
+
+// ════════════════════════════════════════════════════════════
+// HISTORY
+// ════════════════════════════════════════════════════════════
+function recordHistory(){
+  const today=new Date().toISOString().split('T')[0];
+  const a=S.article;
+  if(!S.history.find(h=>h.date===today&&h.id===a.id)){
+    S.history.unshift({date:today,id:a.id,title:a.title,topic:a.topic,lang:S.lang});
+    if(S.history.length>60) S.history.pop();
+    saveHist();
+  }
+}
+
+function renderHist(){
+  const pane=document.getElementById('histList'); if(!pane) return;
+  const list=S.history.filter(h=>h.lang===S.lang);
+  if(!list.length){
+    pane.innerHTML=`<div class="hist-empty">${L('No history yet.<br>Start reading!','Pas encore d\'historique.<br>Commencez à lire !','아직 기록이 없습니다.<br>읽기를 시작하세요!')}</div>`;
+    return;
+  }
+  const loc=S.lang==='en'?'en-GB':'fr-FR';
+  pane.innerHTML=list.map(h=>{
+    const active=S.article&&h.id===S.article.id;
+    const d=new Date(h.date).toLocaleDateString(loc,{day:'numeric',month:'short',year:'numeric'});
+    return `<div class="hist-item${active?' active':''}">
+      <button class="hist-del" onclick="deleteHist('${esc(h.id)}')" title="Remove from history">×</button>
+      <div class="hist-date">${d}</div>
+      <div class="hist-title">${esc(h.title)}</div>
+      <div class="hist-topic">${esc(h.topic)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+// UPLOAD
+// ════════════════════════════════════════════════════════════
+function openUpload(){  document.getElementById('uploadModal').classList.add('open'); }
+function closeUpload(){ document.getElementById('uploadModal').classList.remove('open'); }
+document.getElementById('uploadModal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('uploadModal')) closeUpload();
+});
+
+/* Drag-drop helpers */
+function dzOver(e,id){ e.preventDefault(); document.getElementById(id).classList.add('drag-over'); }
+function dzLeave(id){ document.getElementById(id).classList.remove('drag-over'); }
+function dzDrop(e,type){
+  e.preventDefault();
+  const id=type==='article'?'artDrop':'audioDrop';
+  document.getElementById(id).classList.remove('drag-over');
+  const file=e.dataTransfer.files[0];
+  if(!file) return;
+  if(type==='article') handleArtFile(file);
+  else handleAudioFile(file);
+}
+
+// ════════════════════════════════════════════════════════════
+// SHADOWING PRACTICE
+// ════════════════════════════════════════════════════════════
+const SH = {
+  sentences:[],idx:0,playing:false,loop:false,autoAdv:true,
+  showTrans:false,rate:1.0,transCache:{},
+  timestamps:[],   // [{start,end}] seconds, one per sentence
+  audioEl:null,    // dedicated Audio element for shadowing
+  analyzing:false,
+  usingFile:false,
+  ytMode:false,    // true when using YouTube player
+  ytInterval:null, // polling interval for YouTube currentTime
+};
+
+function extractSentences(article){
+  const text=article.body.join(' ');
+  const raw=text.match(/[^.!?…]+[.!?…]+(?=\s|$)/g)||[text];
+  return raw.map(s=>s.trim()).filter(s=>s.length>8);
+}
+
+/* ── Open / Close ── */
+async function openShadowing(){
+  // Uploaded audio takes priority over YouTube player mode
+  const hasAudio=!!S.audioFileURL;
+  const isYT=!hasAudio && !!(S.ytVideoId && S.article?.id?.startsWith('yt-'));
+  SH.ytMode=isYT;
+  SH.sentences=extractSentences(S.article);
+  SH.timestamps=isYT
+    ?(S.ytTimestamps?.length?S.ytTimestamps.slice(0,SH.sentences.length):SH.sentences.map(()=>null))
+    :[];
+  SH.usingFile=false; SH.analyzing=false;
+
+  if(!SH.sentences.length){ alert(L('No sentences found.','Aucune phrase trouvée.','문장을 찾을 수 없습니다.')); return; }
+  SH.idx=0; SH.playing=false; SH.transCache={};
+
+  document.getElementById('shArticleTitle').textContent=S.article.title;
+
+  // YouTube mode: show embedded player in panel
+  const shYtCont=document.getElementById('shYtContainer');
+  if(isYT){
+    shYtCont.style.display='block';
+    if(ytPlayerReady && !shYtPlayer){
+      shYtPlayer=new YT.Player('shYtEl',{
+        height:'100%',width:'100%',
+        videoId:S.ytVideoId,
+        playerVars:{rel:0,modestbranding:1,controls:1},
+        events:{
+          onReady:()=>{ shYtPlayerReady=true; shYtPlayer.setPlaybackRate(SH.rate); },
+          onError:()=>{
+            // Embedding disabled — replace player area with thumbnail + external link
+            document.getElementById('shYtContainer').innerHTML=`
+              <a href="https://www.youtube.com/watch?v=${S.ytVideoId}" target="_blank" rel="noopener"
+                 style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;background:#fee2e2;
+                        border-radius:10px;margin:0 1rem .5rem;text-decoration:none;color:#dc2626;font-family:sans-serif">
+                <img src="https://img.youtube.com/vi/${S.ytVideoId}/default.jpg"
+                     style="width:80px;border-radius:6px;flex-shrink:0"/>
+                <div>
+                  <div style="font-weight:700;font-size:.9rem">▶ Open video in YouTube</div>
+                  <div style="font-size:.75rem;color:#7f1d1d;margin-top:.2rem">
+                    This video can't be embedded — watch in YouTube while using the transcript &amp; Mark tool here.
+                  </div>
+                </div>
+              </a>`;
+          }
+        }
+      });
+    } else if(shYtPlayer && shYtPlayerReady){
+      try{ shYtPlayer.cueVideoById(S.ytVideoId); shYtPlayer.setPlaybackRate(SH.rate); }catch(e){}
+    }
+  } else {
+    shYtCont.style.display='none';
+  }
+
+  document.getElementById('shadowModal').classList.add('open');
+  shRender();
+
+  if(!isYT && S.audioFileURL){
+    SH.analyzing=true; shRender();
+    await shAnalyzeAudio();
+    SH.usingFile=SH.timestamps.length>0;
+    SH.analyzing=false; shRender();
+  }
+}
+
+function closeShadowing(){
+  shStopAll();
+  document.getElementById('shadowModal').classList.remove('open');
+  document.getElementById('shYtContainer').style.display='none';
+}
+
+document.getElementById('shadowModal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('shadowModal')) closeShadowing();
+});
+
+function shStopAll(){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  if(SH.audioEl){ SH.audioEl.pause(); SH.audioEl.ontimeupdate=null; }
+  if(SH.ytInterval){ clearInterval(SH.ytInterval); SH.ytInterval=null; }
+  if(SH.ytMode && shYtPlayerReady){ try{ shYtPlayer.pauseVideo(); }catch(e){} }
+  SH.playing=false;
+}
+
+function shMarkTime(){
+  if(!SH.ytMode||!shYtPlayerReady) return;
+  try{
+    const t=shYtPlayer.getCurrentTime();
+    SH.timestamps[SH.idx]=t;
+    S.ytTimestamps[SH.idx]=t;
+    shRender();
+  }catch(e){}
+}
+
+/* ── Audio analysis: RMS silence detection → sentence timestamps ── */
+async function shAnalyzeAudio(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const res=await fetch(S.audioFileURL);
+    const buf=await res.arrayBuffer();
+    const decoded=await ctx.decodeAudioData(buf);
+    ctx.close();
+
+    const segs=detectSpeechSegments(decoded);
+    SH.timestamps=mapSegmentsToSentences(segs, decoded.duration, SH.sentences);
+    SH.usingFile=true;
+  }catch(e){
+    // Fallback: proportional timestamps — compute once audio duration is known
+    SH.usingFile=false;
+    SH.timestamps=[];
+    if(!SH.audioEl) SH.audioEl=new Audio();
+    SH.audioEl.src=S.audioFileURL;
+    await new Promise(res=>{
+      SH.audioEl.onloadedmetadata=res;
+      SH.audioEl.onerror=res;
+    });
+    if(SH.audioEl.duration&&isFinite(SH.audioEl.duration)){
+      SH.timestamps=proportionalTimestamps(SH.audioEl.duration, SH.sentences);
+      SH.usingFile=true;
+    }
+  }
+}
+
+function detectSpeechSegments(buffer){
+  const data=buffer.getChannelData(0);
+  const sr=buffer.sampleRate;
+  const chunkSz=Math.floor(sr*0.05);          // 50 ms per chunk
+  const minSilChunks=3;                        // 150 ms silence = boundary
+
+  // Compute RMS per chunk (step through every sample — fast for typical files)
+  const rms=[];
+  for(let c=0,len=data.length;c*chunkSz<len;c++){
+    const s=c*chunkSz, e=Math.min(s+chunkSz,len);
+    let sum=0; for(let i=s;i<e;i++) sum+=data[i]*data[i];
+    rms.push(Math.sqrt(sum/(e-s)));
+  }
+
+  // Adaptive threshold: 7% of peak RMS
+  const peak=Math.max(...rms)||1;
+  const thr=peak*0.07;
+
+  // Walk through chunks: collect contiguous speech blocks
+  const segs=[];
+  let inSpeech=false, spStart=0, silCount=0;
+  for(let i=0;i<rms.length;i++){
+    if(rms[i]>thr){
+      if(!inSpeech){ spStart=i; inSpeech=true; } silCount=0;
+    } else {
+      if(inSpeech){
+        silCount++;
+        if(silCount>=minSilChunks){
+          const start=(spStart*chunkSz)/sr;
+          const end=((i-silCount)*chunkSz)/sr;
+          if(end-start>0.25) segs.push({start,end});
+          inSpeech=false; silCount=0;
+        }
+      }
+    }
+  }
+  if(inSpeech) segs.push({start:(spStart*chunkSz)/sr, end:data.length/sr});
+  return segs;
+}
+
+function mapSegmentsToSentences(segs, duration, sentences){
+  const ratio=segs.length/sentences.length;
+  // Good match: merge or map 1-to-1
+  if(segs.length>0 && ratio>=0.55 && ratio<=1.6){
+    return sentences.map((_,i)=>{
+      const si=Math.min(Math.round(i*segs.length/sentences.length), segs.length-1);
+      return segs[si];
+    });
+  }
+  // Poor match: proportional by word count
+  return proportionalTimestamps(duration, sentences);
+}
+
+function proportionalTimestamps(duration, sentences){
+  const total=sentences.reduce((s,sen)=>s+sen.split(/\s+/).length,0)||1;
+  let cum=0;
+  return sentences.map(sen=>{
+    const w=sen.split(/\s+/).length;
+    const start=(cum/total)*duration;
+    cum+=w;
+    return {start, end:(cum/total)*duration};
+  });
+}
+
+/* ── Render ── */
+function shRender(){
+  const {sentences,idx,loop,autoAdv,showTrans,transCache,analyzing,usingFile}=SH;
+
+  // Analysing state
+  if(analyzing){
+    document.getElementById('shBody').innerHTML=`
+      <div style="text-align:center;font-family:sans-serif;padding:2rem">
+        <div style="font-size:2.5rem;margin-bottom:.9rem">🔍</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.35rem">Analysing your audio…</div>
+        <div style="font-size:.8rem;color:var(--muted)">Detecting silence gaps to find sentence boundaries</div>
+      </div>`;
+    document.getElementById('shPlayBtn').disabled=true;
+    return;
+  }
+  document.getElementById('shPlayBtn').disabled=false;
+
+  const total=sentences.length;
+  const pct=total>1?(idx/(total-1))*100:100;
+  const prev=idx>0?sentences[idx-1]:'';
+  const next=idx<total-1?sentences[idx+1]:'';
+  const trans=transCache[idx];
+  const srcTag=SH.ytMode
+    ?'<span style="color:var(--green)">▶ YouTube</span>'
+    :S.audioFileURL
+      ?(usingFile?'<span style="color:var(--green)">🎵 Uploaded audio</span>':'<span style="color:var(--muted)">🤖 TTS fallback</span>')
+      :'<span style="color:var(--muted)">🤖 TTS</span>';
+
+  // Show/hide YouTube-specific controls
+  const markBtn=document.getElementById('shMarkBtn');
+  const playBtn=document.getElementById('shPlayBtn');
+  if(markBtn) markBtn.style.display=SH.ytMode?'':'none';
+  if(playBtn){
+    if(SH.ytMode){
+      playBtn.textContent='🔄 Replay';
+      playBtn.className='sh-play';
+    }
+  }
+
+  document.getElementById('shBody').innerHTML=`
+    ${prev?`<div class="sh-ctx">${esc(prev)}</div>`:''}
+    <div class="sh-card">
+      <div class="sh-sentence">${esc(sentences[idx])}</div>
+      ${showTrans&&trans?`<div class="sh-translation">→ ${esc(trans)}</div>`:''}
+      ${showTrans&&!trans?`<div class="sh-trans-loading">Fetching translation…</div>`:''}
+    </div>
+    ${next?`<div class="sh-ctx">${esc(next)}</div>`:''}
+    <div class="sh-counter" style="display:flex;gap:.75rem;align-items:center;justify-content:center">
+      <span>Sentence ${idx+1} / ${total}</span>
+      <span style="font-size:.65rem">${srcTag}</span>
+      ${SH.ytMode?(SH.timestamps[idx]!=null?`<span style="font-size:.65rem;color:var(--green)">📌 ${SH.timestamps[idx].toFixed(1)}s</span>`:'<span style="font-size:.65rem;color:var(--muted)">📌 not marked</span>'):''}
+    </div>`;
+
+  document.getElementById('shFill').style.width=pct+'%';
+  document.getElementById('shCounterFtr').textContent=`${idx+1} / ${total}`;
+
+  const pb=document.getElementById('shPlayBtn');
+  if(SH.ytMode){
+    pb.textContent='🔄 Replay';
+    pb.className='sh-play';
+  } else {
+    pb.textContent=SH.playing?'■ Stop':'▶ Play';
+    pb.className='sh-play'+(SH.playing?' playing':'');
+  }
+
+  document.getElementById('shPrevBtn').disabled=idx===0;
+  document.getElementById('shNextBtn').disabled=idx===total-1;
+  document.getElementById('shAutoBtn').className='sh-tog'+(autoAdv?' on':'');
+  document.getElementById('shLoopBtn').className='sh-tog'+(loop?' on':'');
+  document.getElementById('shTransBtn').className='sh-tog'+(showTrans?' on':'');
+
+  [{id:'shS075',v:.75},{id:'shS1',v:1},{id:'shS125',v:1.25},{id:'shS15',v:1.5}].forEach(({id,v})=>{
+    const b=document.getElementById(id);
+    if(b) b.className='sh-spd'+(SH.rate===v?' on':'');
+  });
+}
+
+/* ── Playback ── */
+function shTogglePlay(){
+  if(SH.ytMode){ shReplay(); return; }
+  if(SH.playing){ shStopAll(); shRender(); }
+  else { shPlayCurrent(); }
+}
+
+function shPlayCurrent(){
+  if(SH.ytMode){ shReplay(); return; }
+  if(SH.usingFile && SH.timestamps.length>SH.idx){
+    shPlayFromFile(SH.idx);
+  } else {
+    shPlayTTS();
+  }
+}
+
+function shReplay(){
+  if(!shYtPlayerReady) return;
+  try{
+    const marked=SH.timestamps[SH.idx];
+    const seekTo=marked!=null?marked:Math.max(0,(shYtPlayer.getCurrentTime()||0)-8);
+    shYtPlayer.seekTo(seekTo,true);
+    shYtPlayer.playVideo();
+    shYtPlayer.setPlaybackRate(SH.rate);
+  }catch(e){}
+}
+
+/* Play a time-sliced segment from the uploaded audio file */
+function shPlayFromFile(idx){
+  if(!SH.audioEl) SH.audioEl=new Audio();
+  const {start,end}=SH.timestamps[idx];
+  SH.audioEl.src=S.audioFileURL;
+  SH.audioEl.playbackRate=SH.rate;
+  SH.audioEl.currentTime=start;
+  SH.audioEl.ontimeupdate=null; // clear previous listener
+
+  SH.audioEl.oncanplay=()=>{
+    SH.audioEl.oncanplay=null;
+    SH.audioEl.ontimeupdate=()=>{
+      if(SH.audioEl.currentTime>=end-0.06){
+        SH.audioEl.pause();
+        SH.audioEl.ontimeupdate=null;
+        SH.playing=false;
+        onSentenceDone();
+      }
+    };
+    SH.audioEl.play().catch(()=>{ SH.playing=false; shPlayTTS(); });
+    SH.playing=true; shRender();
+  };
+  SH.audioEl.onerror=()=>{ SH.usingFile=false; shPlayTTS(); };
+  SH.audioEl.load();
+}
+
+/* TTS fallback */
+function shPlayTTS(){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const text=SH.sentences[SH.idx];
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=S.lang==='en'?'en-GB':S.lang==='fr'?'fr-FR':'ko-KR'; u.rate=SH.rate;
+  const voices=speechSynthesis.getVoices(), pref=S.lang==='en'?'en':'fr';
+  u.voice=voices.find(v=>v.lang.startsWith(pref)&&v.localService)||
+           voices.find(v=>v.lang.startsWith(pref))||null;
+  u.onstart=()=>{ SH.playing=true; shRender(); };
+  u.onend=()=>{ SH.playing=false; onSentenceDone(); };
+  u.onerror=()=>{ SH.playing=false; shRender(); };
+  speechSynthesis.speak(u);
+  if(SH.showTrans&&!SH.transCache[SH.idx]) shFetchTrans(SH.idx);
+}
+
+function onSentenceDone(){
+  if(SH.loop){
+    setTimeout(shPlayCurrent,700);
+  } else if(SH.autoAdv&&SH.idx<SH.sentences.length-1){
+    SH.idx++; shRender(); setTimeout(shPlayCurrent,500);
+  } else { shRender(); }
+}
+
+/* ── Navigation ── */
+function shPrev(){
+  if(SH.idx===0) return;
+  shStopAll(); SH.idx--; shRender();
+  if(SH.showTrans&&!SH.transCache[SH.idx]) shFetchTrans(SH.idx);
+}
+function shNext(){
+  if(SH.idx===SH.sentences.length-1) return;
+  shStopAll(); SH.idx++; shRender();
+  if(SH.showTrans&&!SH.transCache[SH.idx]) shFetchTrans(SH.idx);
+}
+function shToggleLoop(){ SH.loop=!SH.loop; if(SH.loop) SH.autoAdv=false; shRender(); }
+function shToggleAuto(){ SH.autoAdv=!SH.autoAdv; if(SH.autoAdv) SH.loop=false; shRender(); }
+function shToggleTrans(){
+  SH.showTrans=!SH.showTrans;
+  if(SH.showTrans&&!SH.transCache[SH.idx]) shFetchTrans(SH.idx);
+  else shRender();
+}
+function shSetRate(r){
+  SH.rate=r;
+  if(SH.audioEl) SH.audioEl.playbackRate=r;
+  if(SH.ytMode && shYtPlayerReady){ try{ shYtPlayer.setPlaybackRate(r); }catch(e){} }
+  shRender();
+  if(SH.playing&&!SH.ytMode) shPlayCurrent();
+}
+
+/* ── Translation per sentence ── */
+async function shFetchTrans(idx){
+  if(SH.transCache[idx]!==undefined) return;
+  SH.transCache[idx]=''; shRender();
+  const text=SH.sentences[idx];
+  const from=S.lang==='en'?'en':S.lang==='fr'?'fr':'ko', to=S.lang==='en'?'fr':'en';
+  try{
+    const q=text.length>400?text.slice(0,400)+'…':text;
+    const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=${from}|${to}`);
+    const d=await r.json();
+    SH.transCache[idx]=d.responseData?.translatedText||'—';
+  }catch(e){ SH.transCache[idx]='—'; }
+  shRender();
+}
+
+// ════════════════════════════════════════════════════════════
+// YOUTUBE IMPORT
+// ════════════════════════════════════════════════════════════
+let ytPlayer=null, ytPlayerReady=false, ytPendingId=null;
+let shYtPlayer=null, shYtPlayerReady=false;
+
+/* Called automatically by YouTube IFrame API when script loads */
+window.onYouTubeIframeAPIReady=function(){
+  ytPlayer=new YT.Player('ytPlayerEl',{
+    height:'1',width:'1',
+    videoId:ytPendingId||'',
+    playerVars:{autoplay:0,controls:0,playsinline:1},
+    events:{
+      onReady:()=>{
+        ytPlayerReady=true;
+        ytPlayer.pauseVideo();
+        if(ytPendingId){ ytPlayer.cueVideoById(ytPendingId); }
+      },
+      onError:(e)=>console.warn('YT error',e.data)
+    }
+  });
+};
+
+function loadYTApi(){
+  if(document.getElementById('ytApiScript')) return;
+  const s=document.createElement('script');
+  s.id='ytApiScript'; s.src='https://www.youtube.com/iframe_api';
+  document.head.appendChild(s);
+}
+
+function extractYTId(url){
+  const m=url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
+  return m?m[1]:null;
+}
+
+function splitIntoSentences(text){
+  // Normalize whitespace/newlines first
+  const cleaned=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n')
+    .replace(/\n{2,}/g,' ').replace(/\n/g,' ').replace(/\s+/g,' ').trim();
+  // Split on sentence-ending punctuation
+  const raw=cleaned.match(/[^.!?。！？]+[.!?。！？]+/g)||[];
+  const sentences=raw.map(s=>s.trim()).filter(s=>s.length>4);
+  return sentences.length>0?sentences:[cleaned];
+}
+
+async function importYouTube(){
+  const url=document.getElementById('ytInput').value.trim();
+  const videoId=extractYTId(url);
+  if(!videoId){ showUpStatus('ytStatus','Could not parse YouTube URL — paste a full youtube.com or youtu.be link.','error'); return; }
+
+  const rawTranscript=document.getElementById('ytTranscript').value.trim();
+  if(!rawTranscript){ showUpStatus('ytStatus','Please paste the transcript text (from YouTube → ⋯ → Open transcript).','error'); return; }
+
+  showUpStatus('ytStatus','⏳ Loading…','ok');
+  const title=await getYTTitle(videoId);
+
+  const sentences=splitIntoSentences(rawTranscript);
+  const paragraphs=groupIntoParagraphs(sentences);
+
+  S.article={
+    id:'yt-'+videoId,
+    topic:'YouTube',
+    title:title||'YouTube Video',
+    sub:L('Imported from YouTube','Importé depuis YouTube','YouTube에서 가져옴'),
+    body:paragraphs,
+    wc:sentences.join(' ').split(/\s+/).length,
+    rt:Math.max(1,Math.ceil(sentences.join(' ').split(/\s+/).length/200))+' min'
+  };
+  S.ytVideoId=videoId;
+  S.ytTimestamps=sentences.map(()=>null); // user will mark times manually
+
+  ytPendingId=videoId;
+  if(!ytPlayerReady) loadYTApi();
+
+  recordHistory(); renderReader();
+  showUpStatus('ytStatus',`✓ "${title||videoId}" — ${sentences.length} sentences ready`,'ok');
+  setTimeout(closeUpload,1400);
+}
+
+async function getYTTitle(id){
+  try{
+    const r=await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`);
+    const d=await r.json(); return d.title||'';
+  }catch(e){ return ''; }
+}
+
+
+function groupIntoParagraphs(sentences,perPara=4){
+  const out=[];
+  for(let i=0;i<sentences.length;i+=perPara)
+    out.push(sentences.slice(i,i+perPara).join(' '));
+  return out;
+}
+
+/* ── Reformat editor ── */
+function openReformat(){
+  const raw=S.article.body.join('\n\n');
+  document.getElementById('rfTextarea').value=raw;
+  onRfInput(raw);
+  document.getElementById('reformatModal').classList.add('open');
+}
+function closeReformat(){ document.getElementById('reformatModal').classList.remove('open'); }
+document.getElementById('reformatModal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('reformatModal')) closeReformat();
+});
+
+function onRfInput(text){
+  const paras=rfParse(text);
+  document.getElementById('rfParaCount').textContent=paras.length+' paragraph'+(paras.length!==1?'s':'');
+  document.getElementById('rfPreview').innerHTML=
+    paras.length ? paras.map(p=>`<p>${esc(p)}</p>`).join('') : '<p style="color:var(--muted);font-style:italic">Nothing to preview yet…</p>';
+}
+
+function rfParse(text){
+  return text.split(/\n\s*\n/).map(p=>p.replace(/\n/g,' ').trim()).filter(p=>p.length>0);
+}
+
+function applyReformat(){
+  const paras=rfParse(document.getElementById('rfTextarea').value);
+  if(!paras.length) return;
+  S.article={...S.article, body:paras, wc:paras.join(' ').split(/\s+/).length,
+    rt:Math.max(1,Math.ceil(paras.join(' ').split(/\s+/).length/200))+' min'};
+  renderReader(); closeReformat();
+}
+
+/* ── Smart paragraph detection (used by loadWrittenArticle & handleArtFile) ── */
+function smartSplit(raw){
+  const text=raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim();
+  const lines=text.split('\n');
+
+  // If there are already blank lines, use them as definitive paragraph breaks
+  if(/\n[ \t]*\n/.test(text)){
+    return text.split(/\n[ \t]*\n/).map(p=>p.replace(/\n/g,' ').trim()).filter(p=>p.length>10);
+  }
+
+  // No blank lines — decide whether to join or keep line breaks
+  const nonEmpty=lines.filter(l=>l.trim().length>0);
+  const avgLen=nonEmpty.reduce((s,l)=>s+l.trim().length,0)/(nonEmpty.length||1);
+
+  if(avgLen>70){
+    // Lines are long → likely word-wrapped prose; treat whole block as one blob, then sentence-group
+    const sentences=text.match(/[^.!?…]+[.!?…]+(?:\s|$)/g)||[text];
+    const paras=[];
+    for(let i=0;i<sentences.length;i+=4) paras.push(sentences.slice(i,i+4).join('').trim());
+    return paras.filter(p=>p.length>10);
+  }
+
+  // Short/medium lines → each non-empty line is its own paragraph
+  return nonEmpty.map(l=>l.trim()).filter(p=>p.length>10);
+}
+
+/* History delete */
+function deleteHist(id){
+  S.history=S.history.filter(h=>h.id!==id);
+  saveHist(); renderHist();
+}
+
+/* Write / Paste article */
+function loadWrittenArticle(){
+  const raw=document.getElementById('writeBody').value.trim();
+  if(!raw){ showUpStatus('writeStatus','Please paste or type some text first.','error'); return; }
+
+  const titleInput=document.getElementById('writeTitle').value.trim();
+  let paras=smartSplit(raw);
+  if(!paras.length){ showUpStatus('writeStatus','Could not parse any text.','error'); return; }
+
+  // Use first para as title if no title given, then remove it from body
+  let title=titleInput;
+  if(!title){ title=paras[0].slice(0,80)+(paras[0].length>80?'…':''); paras=paras.slice(1); }
+  if(!paras.length) paras=[raw]; // fallback: whole text as one paragraph
+
+  S.article={
+    id:'write-'+Date.now(),
+    topic:S.lang==='en'?'Custom':'Personnalisé',
+    title, sub:'',
+    body:paras.slice(0,30),
+    wc:paras.join(' ').split(/\s+/).length,
+    rt:Math.max(1,Math.ceil(paras.join(' ').split(/\s+/).length/200))+' min'
+  };
+  recordHistory(); renderReader();
+  showUpStatus('writeStatus',`✓ Loaded "${title.slice(0,40)}${title.length>40?'…':''}"`, 'ok');
+  setTimeout(closeUpload,1000);
+}
+
+/* Article upload */
+function handleArtFile(file){
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const text=e.target.result;
+    if(!text.trim()){ showUpStatus('artStatus','No readable text found.','error'); return; }
+    const allParas=smartSplit(text);
+    if(!allParas.length){ showUpStatus('artStatus','No readable text found.','error'); return; }
+    const title=allParas[0].slice(0,120);
+    const body=allParas.slice(1).length ? allParas.slice(1) : allParas;
+
+    S.article={
+      id:'upload-'+Date.now(), topic:S.lang==='en'?'Uploaded':'Importé',
+      title, sub:S.lang==='en'?'Uploaded article':'Article importé',
+      body:body.slice(0,20), wc:body.join(' ').split(/\s+/).length,
+      rt:Math.ceil(body.join(' ').split(/\s+/).length/200)+' min'
+    };
+    recordHistory();
+    renderReader();
+    showUpStatus('artStatus',`✓ "${file.name}" loaded (${lines.length} lines)`,'ok');
+    setTimeout(closeUpload,1200);
+  };
+  reader.readAsText(file);
+}
+
+/* Audio upload */
+function handleAudioFile(file){
+  if(!file) return;
+  if(S.audioFileURL) URL.revokeObjectURL(S.audioFileURL);
+  S.audioFileURL=URL.createObjectURL(file);
+  S.uploadedAudioName=file.name;
+  if(S.audioEl){ S.audioEl.pause(); S.audioEl=null; }
+  stopAudio();
+  showUpStatus('audioStatus',`✓ "${file.name}" ready`,'ok');
+  showAudioFileName();
+  setTimeout(closeUpload,1000);
+}
+
+function showUpStatus(id,msg,type){
+  const el=document.getElementById(id);
+  el.textContent=msg;
+  el.style.color=type==='ok'?'var(--green)':'var(--danger)';
+  el.classList.add('show');
+}
+
+// ════════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════════
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ════════════════════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════════════════════
+loadPersisted();
+if('speechSynthesis' in window){
+  speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged=()=>{};
+}
+</script>
+</body>
+</html>

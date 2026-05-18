@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>口才训练计划</title>
+<style>
+/* ── BASE ─────────────────────────────────── */
+:root {
+  --bg:      #f0e9e1;
+  --bg2:     #ede5dc;
+  --surface: #faf5f0;
+  --surface2:#fffaf4;
+  --border:  #e4d9cf;
+  --text:    #2d1f15;
+  --text2:   #8a6a57;
+  --text3:   #b08a76;
+  --accent:  #c4623a;
+  --accent2: #a84f2b;
+  --alight:  #f6ddd3;
+  --green:   #4a9e74;
+  --gold:    #d4943d;
+  --danger:  #c0392b;
+  --shadow:  0 18px 50px rgba(75, 47, 30, .10);
+  --ring-track: rgba(196,98,58,.18);
+  --ring-color: #c4623a;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'PingFang SC','Noto Sans SC','Microsoft YaHei',Georgia,sans-serif;
+  background:
+    radial-gradient(circle at 48% 14%, rgba(255,250,244,.9) 0 16%, transparent 34%),
+    radial-gradient(circle at 82% 76%, rgba(196,98,58,.10) 0 14%, transparent 34%),
+    linear-gradient(135deg, var(--bg), #eadfd4);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.7;
+}
+button { cursor: pointer; border: none; font-family: inherit; }
+select { font-family: inherit; }
+button:focus-visible,
+select:focus-visible,
+.plan-item:focus-visible,
+.stage-item:focus-visible {
+  outline: 3px solid rgba(196,98,58,.28);
+  outline-offset: 3px;
+}
+
+/* ── 3-COLUMN LAYOUT ─────────────────────── */
+.app {
+  display: grid;
+  grid-template-columns: 256px 1fr 320px;
+  height: 100vh;
+}
+
+/* ── LEFT SIDEBAR ────────────────────────── */
+.left {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.brand {
+  padding: 24px 22px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.brand-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .01em;
+}
+/* Settings */
+.settings {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.setting-label {
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 44px;
+}
+.setting-row select {
+  flex: 1;
+  background: var(--bg2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+.setting-row select:focus { border-color: var(--accent); }
+
+.session-bar {
+  margin-top: 8px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(196,98,58,.14);
+  overflow: hidden;
+}
+.session-bar-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  transition: width .35s ease;
+}
+
+/* Plan navigation */
+.plan-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 12px 16px;
+}
+.plan-nav::-webkit-scrollbar { width: 4px; }
+.plan-nav::-webkit-scrollbar-track { background: transparent; }
+.plan-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.plan-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s;
+  margin-bottom: 2px;
+  border-left: 2px solid transparent;
+}
+.plan-item:hover { background: var(--bg2); transform: translateX(1px); }
+.plan-item.active {
+  background: var(--alight);
+  border-left-color: var(--accent);
+}
+.plan-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--bg2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.plan-item.active .plan-icon {
+  background: var(--accent);
+  color: #fff;
+}
+.plan-info { min-width: 0; }
+.plan-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.plan-sub {
+  font-size: 11px;
+  color: var(--text3);
+  white-space: nowrap;
+}
+/* ── CENTER ──────────────────────────────── */
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 32px 24px;
+  overflow-y: auto;
+  gap: 0;
+}
+.center::before {
+  content: '';
+  position: fixed;
+  width: 360px;
+  height: 360px;
+  top: 7vh;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(250,245,240,.74), rgba(250,245,240,0) 68%);
+  pointer-events: none;
+  z-index: -1;
+}
+.center::-webkit-scrollbar { width: 4px; }
+.center::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.stage-title {
+  font-size: 24px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 10px;
+  min-height: 32px;
+  transition: opacity .4s, transform .4s;
+}
+.stage-title .lang-tag {
+  font-size: 10px;
+  font-family: sans-serif;
+  color: var(--text3);
+  background: var(--bg2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+/* ── TIMER CIRCLE ────────────────────────── */
+.timer-wrap {
+  position: relative;
+  width: 236px;
+  height: 236px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 20px 36px rgba(75,47,30,.10));
+}
+.timer-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  background: rgba(255,250,244,.46);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.54);
+}
+.timer-svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+.timer-track {
+  fill: none;
+  stroke: var(--ring-track);
+  stroke-width: 3;
+}
+.timer-prog {
+  fill: none;
+  stroke: var(--ring-color);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 703.7;
+  stroke-dashoffset: 0;
+  transition: stroke .6s, stroke-dashoffset .08s linear;
+}
+
+/* Breathing ball inside circle */
+.breath-ball {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.breath-ball-inner {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f8d5c5, var(--accent));
+  opacity: 0;
+  transition: transform 4s ease-in-out, opacity .6s, background 1s;
+  box-shadow: 0 0 30px rgba(196,98,58,.3);
+}
+.breath-ball-inner.visible { opacity: .85; }
+
+/* Timer text overlay */
+.timer-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.timer-time {
+  font-family: Georgia, serif;
+  font-size: 52px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -.02em;
+  transition: opacity .3s;
+}
+.timer-time.urgent { color: var(--danger); }
+.breath-phase-lbl {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 6px;
+  min-height: 20px;
+  letter-spacing: .04em;
+  transition: color .5s;
+}
+
+/* Stage complete overlay */
+.complete-ring {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  opacity: 0;
+  transition: opacity .4s;
+  pointer-events: none;
+}
+
+/* ── PRACTICE TEXT ───────────────────────── */
+.practice-area {
+  width: 100%;
+  max-width: 620px;
+  text-align: center;
+  margin-bottom: 18px;
+  min-height: 80px;
+  transition: opacity .4s, transform .4s;
+  padding: 4px 8px 0;
+}
+.practice-text {
+  font-family: Georgia, serif;
+  font-size: 17px;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+.practice-text.cn { font-family: 'PingFang SC','Microsoft YaHei',serif; font-style: normal; font-size: 17px; }
+.practice-text.en { font-family: Georgia,serif; }
+.practice-note {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 10px;
+  font-style: normal;
+}
+
+/* ── CONTROLS ────────────────────────────── */
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.btn-ghost {
+  background: var(--surface);
+  color: var(--text2);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 10px 24px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.btn-ghost:hover { background: var(--bg2); color: var(--text); border-color: var(--text3); }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 100px;
+  padding: 12px 36px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  box-shadow: 0 2px 12px rgba(196,98,58,.35);
+  transition: background .15s, box-shadow .15s, transform .1s;
+}
+.btn-primary:hover { background: var(--accent2); box-shadow: 0 4px 18px rgba(196,98,58,.45); }
+.btn-primary:active { transform: scale(.97); }
+.btn-primary.paused { background: #5a8f6e; box-shadow: 0 2px 12px rgba(90,143,110,.35); }
+
+/* ── RIGHT SIDEBAR ───────────────────────── */
+.right {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.right-header {
+  padding: 24px 22px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.right-plan-name {
+  font-size: 17px;
+  font-family: Georgia, serif;
+  color: var(--text);
+  font-weight: 400;
+}
+.right-plan-sub {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+.stages-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px 12px;
+}
+.stages-list::-webkit-scrollbar { width: 4px; }
+.stages-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.stage-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s;
+  margin-bottom: 2px;
+}
+.stage-item:hover { background: var(--bg2); transform: translateX(-1px); }
+.stage-item.active { background: var(--alight); }
+.stage-item.done { opacity: .55; }
+.stage-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background .2s, color .2s;
+}
+.stage-item.active .stage-num { background: var(--accent); color: #fff; }
+.stage-item.done .stage-num { background: var(--green); color: #fff; }
+.stage-info { flex: 1; min-width: 0; }
+.stage-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stage-item.active .stage-item-name { color: var(--accent); font-weight: 600; }
+.stage-item-sub {
+  font-size: 11px;
+  color: var(--text3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stage-dur {
+  font-size: 12px;
+  color: var(--text3);
+  font-family: monospace;
+  flex-shrink: 0;
+}
+.stage-item.active .stage-dur { color: var(--accent); }
+/* ── TRANSITIONS ─────────────────────────── */
+.fade-out { opacity: 0 !important; transform: translateY(-10px) !important; pointer-events: none; }
+.fade-in { animation: fadeUp .4s ease forwards; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── DONE BURST ──────────────────────────── */
+.burst { position: fixed; font-size: 20px; pointer-events: none; z-index: 999; animation: burstAnim .9s ease-out forwards; }
+@keyframes burstAnim {
+  0%   { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%,-180%) scale(1.5); }
+}
+
+/* ── COMPLETE BANNER ─────────────────────── */
+.complete-banner {
+  position: fixed; inset: 0; background: rgba(240,233,225,.92);
+  display: none; align-items: center; justify-content: center;
+  z-index: 800; flex-direction: column; gap: 12px;
+  animation: fadeIn .4s ease;
+}
+.complete-banner.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.cb-emoji { font-size: 56px; }
+.cb-title { font-family: Georgia,serif; font-size: 28px; color: var(--text); }
+.cb-sub { font-size: 14px; color: var(--text2); }
+.cb-btn {
+  background: var(--accent); color: #fff; border-radius: 100px;
+  padding: 12px 32px; font-size: 14px; font-weight: 600;
+  box-shadow: 0 2px 12px rgba(196,98,58,.35); margin-top: 8px;
+}
+.cb-btn:hover { background: var(--accent2); }
+
+.is-running .practice-area {
+  color: var(--text);
+}
+.is-running .stage-title {
+  opacity: .86;
+}
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; height: auto; overflow: auto; }
+  .left { max-height: 260px; border-right: none; border-bottom: 1px solid var(--border); }
+  .right { border-left: none; border-top: 1px solid var(--border); max-height: 300px; }
+  html, body { height: auto; overflow: auto; }
+  .center { padding: 20px 16px; }
+  .brand { padding: 18px 18px 12px; }
+  .settings { display: grid; grid-template-columns: 1fr; }
+  .stage-title { font-size: 22px; margin-bottom: 8px; }
+  .timer-wrap { width: 210px; height: 210px; }
+  .timer-time { font-size: 46px; }
+  .practice-area { padding: 0 6px; }
+  .controls { width: 100%; justify-content: center; }
+  .btn-primary { flex: 1; max-width: 180px; }
+}
+
+@media (max-width: 560px) {
+  .left { max-height: none; }
+  .plan-nav { display: flex; overflow-x: auto; padding-bottom: 12px; }
+  .plan-item { min-width: 190px; }
+  .controls { flex-wrap: wrap; }
+  .btn-ghost, .btn-primary { padding-left: 18px; padding-right: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ COMPLETE BANNER ═══════════════════════ -->
+<div class="complete-banner" id="completeBanner">
+  <div class="cb-emoji">🎉</div>
+  <div class="cb-title">练习完成！</div>
+  <div class="cb-sub" id="cbSub">今天的训练全部完成。</div>
+  <button class="cb-btn" type="button" onclick="restartSession()">再练一遍</button>
+</div>
+
+<!-- ═══════════════════════ APP ═══════════════════════ -->
+<div class="app">
+
+  <!-- ── LEFT ── -->
+  <aside class="left">
+    <div class="brand">
+      <div class="brand-title">口才训练计划</div>
+    </div>
+
+    <div class="settings">
+      <div class="setting-row">
+        <span class="setting-label">今天</span>
+        <select id="daySelect" onchange="onSettingsChange()">
+          <option value="1">周一 Mon</option>
+          <option value="2">周二 Tue</option>
+          <option value="3">周三 Wed</option>
+          <option value="4">周四 Thu</option>
+          <option value="5">周五 Fri</option>
+          <option value="6">周六 Sat</option>
+          <option value="0">周日 Sun</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">中文周</span>
+        <select id="cnWeek" onchange="onSettingsChange()">
+          <option value="1">第1周</option>
+          <option value="2">第2周</option>
+          <option value="3">第3周</option>
+          <option value="4">第4周</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">英文周</span>
+        <select id="enWeek" onchange="onSettingsChange()">
+          <option value="1">第1周</option>
+          <option value="2">第2周</option>
+          <option value="3">第3周</option>
+          <option value="4">第4周</option>
+        </select>
+      </div>
+      <div class="session-bar" aria-label="Session progress">
+        <div class="session-bar-fill" id="sessionProgressFill"></div>
+      </div>
+    </div>
+
+    <nav class="plan-nav" id="planNav"></nav>
+  </aside>
+
+  <!-- ── CENTER ── -->
+  <main class="center">
+    <h1 class="stage-title" id="stageTitle">腹式呼吸</h1>
+
+    <div class="timer-wrap" role="timer" aria-live="polite" aria-label="Time remaining">
+      <svg class="timer-svg" viewBox="0 0 260 260">
+        <circle class="timer-track" cx="130" cy="130" r="112"/>
+        <circle class="timer-prog"  cx="130" cy="130" r="112" id="timerRing"/>
+      </svg>
+      <div class="breath-ball"><div class="breath-ball-inner" id="breathBall"></div></div>
+      <div class="timer-text">
+        <div class="timer-time"    id="timerTime">3:00</div>
+        <div class="breath-phase-lbl" id="breathPhaseLbl"></div>
+      </div>
+      <div class="complete-ring" id="completeRing">✓</div>
+    </div>
+
+    <div class="practice-area" id="practiceArea">
+      <div class="practice-text" id="practiceText"></div>
+      <div class="practice-note" id="practiceNote"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-ghost" type="button" onclick="resetStage()">↩ Reset</button>
+      <button class="btn-primary" type="button" id="startBtn" onclick="toggleTimer()">▶ Start</button>
+      <button class="btn-ghost" type="button" onclick="skipStage()">Skip ↪</button>
+    </div>
+  </main>
+
+  <!-- ── RIGHT ── -->
+  <aside class="right">
+    <div class="right-header">
+      <div class="right-plan-name" id="rightPlanName">今日练习</div>
+      <div class="right-plan-sub" id="rightPlanSub">每天 35 分钟</div>
+    </div>
+    <div class="stages-list" id="stagesList"></div>
+  </aside>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════════
+const CIRC = 2 * Math.PI * 112; // ≈ 703.7
+
+// ══════════════════════════════════════════════
+// STAGE CONTENT LIBRARY
+// ══════════════════════════════════════════════
+const T = {
+  // Breathing
+  breath3: { title:'腹式呼吸', sub:'Diaphragmatic Breathing', dur:180, lang:'cn', isBreath:true,
+    text:'吸气 4 秒：小腹微微鼓起来。\n停 1 秒。\n呼气 6 秒：小腹慢慢收回去。\n\n做 8 轮。',
+    note:'不要耸肩，不要抬胸，不要张嘴猛吸气。' },
+  breath4: { title:'腹式呼吸', sub:'Diaphragmatic Breathing', dur:240, lang:'cn', isBreath:true,
+    text:'吸气 4 秒：小腹微微鼓起来。\n停 1 秒。\n呼气 6 秒：小腹慢慢收回去。\n\n做 10 轮。',
+    note:'不要耸肩，不要抬胸，不要张嘴猛吸气。' },
+  breath2: { title:'腹式呼吸', sub:'Diaphragmatic Breathing', dur:120, lang:'cn', isBreath:true,
+    text:'吸气 4 秒，停 1 秒，呼气 6 秒。\n\n做 6 轮。',
+    note:'气不够就停，不要硬撑。' },
+  breathEn: { title:'腹式呼吸', sub:'Diaphragmatic Breathing', dur:180, lang:'en', isBreath:true,
+    text:'Inhale 4 sec · Hold 1 sec · Exhale 6 sec\n\n8 rounds.\nBelly rises on inhale, shoulders stay still.',
+    note:'' },
+
+  // CN Week 1
+  longVowel5: { title:'长音练习', sub:'Long Vowels', dur:300, lang:'cn',
+    text:'啊——\n嗯——\n呜——',
+    note:'每个音发 5 次，每次 6–8 秒。喉咙不疼，声音不断，尾音不塌，不要喊，不要挤。' },
+  longVowel4: { title:'长音练习', sub:'Long Vowels', dur:240, lang:'cn',
+    text:'啊——\n嗯——\n呜——',
+    note:'每个音发 4 次，每次 7–8 秒。声音从气息里出来，喉咙保持松。' },
+  longVowel3: { title:'长音练习', sub:'Long Vowels', dur:180, lang:'cn',
+    text:'啊—— 3次\n嗯—— 3次\n呜—— 3次',
+    note:'每次 8 秒左右。气不够就停。' },
+  qixi: { title:'气息练习', sub:'Breath Training', dur:480, lang:'cn',
+    text:'出东门，过大桥，\n大桥底下一树枣，\n拿着杆子去打枣，\n青的多，红的少。\n\n一颗枣两颗枣三颗枣四颗枣五颗枣，\n六颗枣七颗枣八颗枣九颗枣十颗枣，\n十颗枣九颗枣八颗枣七颗枣六颗枣，\n五颗枣四颗枣三颗枣两颗枣一颗枣。',
+    note:'第一遍一句换气 → 两句换气 → 连起来读 → 录音' },
+  houyin: { title:'喉音练习', sub:'Throat Resonance', dur:300, lang:'cn',
+    text:'费家有面粉红墙，\n粉红墙上画凤凰，\n凤凰画在粉红墙，\n红凤凰看黄凤凰，\n黄凤凰看红凤凰、\n粉凤凰、飞凤凰、\n粉红凤凰、花凤凰，\n全都仿佛活凤凰。',
+    note:'不要压嗓子。声音要从气息里出来，喉咙保持松。慢 → 正常 → 气息支撑' },
+  relax1: { title:'放松朗读', sub:'Relaxed Reading', dur:180, lang:'cn',
+    text:'我现在练习的是稳定的声音。\n我不急着说快，我先把气息放稳。\n我的声音不是从喉咙里挤出来，\n而是被气息轻轻托出来。\n我说话时喉咙放松，嘴巴打开，声音自然。',
+    note:'' },
+
+  // CN Week 2
+  chunyin: { title:'唇音练习', sub:'Lip Exercises', dur:360, lang:'cn',
+    text:'八百标兵奔北坡，\n炮兵并排北边跑，\n炮兵怕把标兵碰，\n标兵怕把炮兵炮。',
+    note:'b、p 要清楚。嘴唇先闭合再弹开。慢 → 正常 → 加快 → 录音' },
+  chunyin2: { title:'唇音进阶', sub:'Lip Power Advanced', dur:240, lang:'cn',
+    text:'半盆冰棒半盆瓶，\n冰棒碰盆，盆碰瓶，\n盆碰冰棒盆不怕，\n冰棒碰瓶瓶必崩。',
+    note:'重点字：半、盆、冰、棒、瓶、碰、崩。练嘴唇力量和爆破音。' },
+  dun: { title:'舌尖中音', sub:'Tongue-tip Sounds d/t/n/l', dur:300, lang:'cn',
+    text:'你会炖炖冻豆腐，\n你来炖我的炖冻豆腐，\n你不会炖炖冻豆腐，\n别胡炖乱炖，\n炖坏了我的炖冻豆腐。',
+    note:'慢读。咬清楚。不要快。注意：炖、冻、豆、腐、胡、乱、坏' },
+  relax2: { title:'朗读输出', sub:'Reading Output', dur:180, lang:'cn',
+    text:'我说话不用嗓子硬挤。\n我用气息托住声音。\n我的嘴唇有力量，舌头也更灵活。\n我说慢一点，但每个字都完整。',
+    note:'' },
+
+  // CN Week 3
+  sheshi: { title:'舌齿音 s/sh', sub:'Sibilants', dur:360, lang:'cn',
+    text:'司小四和史小世。\n四月十四日，十四时四十一上集市。\n司小四买了四十四斤四两西红柿。\n史小世买了十四斤四两细蚕丝。\n司小四要拿四十四斤四两西红柿，\n换史小世十四斤四两细蚕丝。\n史小世十四斤四两细蚕不换，\n司小四四十四斤四两西红柿。',
+    note:'不要追求快，先把"四"和"十"分清楚。逐字慢读 → 正常 → 录音' },
+  jqx: { title:'舌面音 j/q/x', sub:'Palatal Sounds', dur:300, lang:'cn',
+    text:'七巷一个漆匠，\n西巷一个锡匠。\n七巷漆匠用了西巷锡匠的锡，\n西巷锡匠拿了七巷漆匠的漆。\n七巷漆匠气西巷锡匠用了漆，\n西巷锡匠讥七巷漆匠拿了锡。',
+    note:'不要把"七"读成"吃"。舌面轻轻抬起，声音往前送。' },
+  nl: { title:'n 和 l 练习', sub:'n/l Distinction', dur:300, lang:'cn',
+    text:'先读：na/la · ne/le · ni/li · nu/lu · nü/lü（每组5遍）\n\n老龙恼怒闹老农，\n老农恼怒闹老龙。\n农怒龙恼农更怒，\n龙恼农怒龙怕农。\n\n牛郎年年念刘娘，\n刘娘连连念牛郎。\n郎念娘来娘念郎。',
+    note:'如果你平时 n、l 不清楚，这部分必须练。' },
+  speak3: { title:'自然表达', sub:'Free Speaking', dur:360, lang:'cn',
+    text:'话题：今天我练口才时，最难的是哪个音？\n\n我今天觉得最难的是……\n原因是……\n我接下来准备……',
+    note:'对着手机录音说 1 分钟。检查：声音虚不虚 · 气够不够 · 字糊不糊' },
+
+  // CN Week 4
+  genyin: { title:'舌根音 g/k/h', sub:'Velar Sounds', dur:300, lang:'cn',
+    text:'一班有个黄贺，\n二班有个王克。\n黄贺、王克二人搞创作，\n黄贺搞木刻，王克写诗歌。\n黄贺帮助王克写诗歌，\n王克帮助黄贺搞木刻。\n由于二人搞协作，\n黄贺完成了木刻，\n王克写好了诗歌。',
+    note:'声音不要卡在喉咙。舌根轻轻抬起。不要为了发清楚而挤嗓子。' },
+  rl: { title:'r 和 l 练习', sub:'r/l Practice', dur:300, lang:'cn',
+    text:'烈日炎炎热如火，\n昨日热今日仍然热，\n一日比一日热，\n日日热夜里仍然热，\n安然对天热，天热人不热。\n\n蓝教练是女教练，吕教练是男教练。\n蓝教练不是男教练，吕教练不是女教练。\n蓝南是男篮主力，吕楠是女篮主力。\n吕教练在男篮训练蓝南，\n蓝教练在女篮训练吕楠。',
+    note:'如果"热、日、人、蓝、男、吕、女"容易糊，这部分要慢慢练。' },
+  zonghe: { title:'综合绕口令', sub:'Combined Twisters', dur:300, lang:'cn',
+    text:'【气息】出东门，过大桥，大桥底下一树枣，\n拿着杆子去打枣，青的多，红的少。\n\n【唇音】八百标兵奔北坡，炮兵并排北边跑，\n炮兵怕把标兵碰，标兵怕把炮兵炮。\n\n【舌头】你会炖炖冻豆腐，你来炖我的炖冻豆腐，\n别胡炖乱炖，炖坏了我的炖冻豆腐。',
+    note:'每段：慢 → 正常 → 录音' },
+
+  // EN Week 1
+  enLong4: { title:'英文长音', sub:'English Long Vowels', dur:240, lang:'en',
+    text:'ah——\nmm——\noo——\nee——',
+    note:'Each 5×, hold 5–8 sec. ah→"father" · oo→"food" · ee→"see" · mm→feel lips vibrate' },
+  enGasBreath: { title:'短句气息练习', sub:'Breath Phrases', dur:360, lang:'en',
+    text:'I speak slowly and clearly.\nI use my breath to support my voice.\nI do not push my voice from my throat.\nMy mouth is open, and my tongue is relaxed.\nI can speak English with a steady voice.',
+    note:'One breath per sentence. 5× each. Voice steady. Do not fade at sentence end.' },
+  enReading1: { title:'轻声朗读', sub:'Gentle Reading', dur:420, lang:'en',
+    text:"Today, I am practicing my English voice.\nI do not need to speak fast.\nI only need to speak clearly.\nI breathe from my belly, not from my shoulders.\nMy throat is relaxed.\nMy voice is supported by my breath.\nEvery day, my English will become clearer and stronger.",
+    note:'5×: very slow → normal → pause on phrases → record → mimic natural tone' },
+
+  // EN Week 2
+  enPlosive: { title:'爆破音 p/b/t/d/k/g', sub:'Plosive Consonants', dur:300, lang:'en',
+    text:'p/b:  pay, paper, people · big, better, beautiful\nt/d:  time, today, total · day, data, different\nk/g:  can, clear, correct · go, good, great',
+    note:'p/t/k need a puff of air. b/d/g — do not push from throat. 3× each word.' },
+  enFV: { title:'唇齿音 f/v', sub:'Labiodental f/v', dur:240, lang:'en',
+    text:'fine, five, face, feel, family\nvery, voice, visit, value, video\n\nFive very friendly visitors visited Vanessa.\nVictor values a very clear voice.',
+    note:'Upper teeth touch lower lip lightly. Air flows between — do not bite hard.' },
+  enTH: { title:'th 音练习', sub:'TH Sound Practice', dur:300, lang:'en',
+    text:'Voiceless: think, thank, three, thirty, Thursday\nVoiced:    this, that, these, those, mother\n\nI think this is the third thing.\nThese three things are important.\nThank you for thinking about this.',
+    note:'Tongue tip lightly between teeth. Not "s" or "z" — just a light touch.' },
+  enRead2: { title:'朗读输出', sub:'Reading Output', dur:300, lang:'en',
+    text:"I want my English to sound clear, not rushed.\nI will open my mouth and finish every word.\nI will not swallow the final sounds.\nI will practice slowly first, and then speak faster later.",
+    note:"Check: word's -d · first's -st · faster not mumbled" },
+
+  // EN Week 3
+  enRL: { title:'r / l 练习', sub:'r/l Contrast', dur:360, lang:'en',
+    text:'l:  light, long, listen, little / feel, call, tell\nr:  right, red, really, around / car, more, before\n\nContrast: light/right · long/wrong · glass/grass\n           collect/correct · play/pray\n\nI really like learning English.\nThe red light is on the right.\nPlease correct my pronunciation clearly.',
+    note:'l: tongue-tip touches upper gum ridge. r: tongue curls back, never touches palate.' },
+  enSsh: { title:'s/sh/ch/j 练习', sub:'Sibilants & Affricates', dur:300, lang:'en',
+    text:"s:  see, city, serious, simple\nsh: she, short, should, special\nch: China, choose, change, teacher\nj:  job, judge, enjoy, project\n\nContrast: see/she · sip/ship · cheap/jeep\n\nShe sells special shoes in the city.\nI chose a cheap jacket for the project.",
+    note:'' },
+  enFinal: { title:'结尾音 Final Sounds', sub:'Word Endings', dur:300, lang:'en',
+    text:'good, bad, need, world, first, next\nasked, worked, liked, helped\n\nI worked hard and asked good questions.\nThe first step is not always the next step.\nI liked the project because it helped me learn.',
+    note:'Do NOT drop: worked≠work · liked≠like · first -st · world -ld' },
+  enRhythm: { title:'连读和停顿', sub:'Rhythm & Pausing', dur:300, lang:'en',
+    text:"When I speak English, / I try to group my words.\nI pause after each idea, / not after every word.\nThis makes my English sound smoother / and easier to understand.\n\nI want to improve my pronunciation / because I want to sound clearer / and more confident.",
+    note:'Pause at each / mark. Speak in phrases, not word-by-word.' },
+
+  // EN Week 4 warmup
+  enWarm: { title:'发声热身', sub:'Voice Warm-up', dur:300, lang:'en', isBreath:true,
+    text:'ah—— 3×    mm—— 3×    oo—— 3×    ee—— 3×\n\nI speak clearly.\nI speak calmly.\nI speak with breath support.',
+    note:'5× each sentence. Feel the resonance, not the throat strain.' },
+  enRead4: { title:'英文朗读', sub:'English Reading', dur:300, lang:'en',
+    text:"I used to feel nervous when I spoke English.\nSometimes my voice was weak, and my pronunciation was not clear.\nNow I am learning to slow down, breathe deeply, and speak with support.\nI do not need to sound perfect.\nI only need to sound clear, steady, and confident.\nWith daily practice, my English will become easier to understand.",
+    note:'slow → phrase pauses → record → find ONE issue → fix it' },
+};
+
+// Day-specific content
+const DAY_CN_TWISTER = {
+  1:{ title:'舌齿音 s/sh', text:'司小四和史小世。\n四月十四日，十四时四十一上集市。\n司小四买了四十四斤四两西红柿。\n史小世买了十四斤四两细蚕丝。\n司小四要拿四十四斤四两西红柿，\n换史小世十四斤四两细蚕丝。\n史小世十四斤四两细蚕不换，\n司小四四十四斤四两西红柿。', note:'先把"四"和"十"分清楚。慢→正常→录音' },
+  2:{ title:'舌尖中音 d/t/n/l', text:'你会炖炖冻豆腐，\n你来炖我的炖冻豆腐，\n你不会炖炖冻豆腐，\n别胡炖乱炖，\n炖坏了我的炖冻豆腐。', note:'慢读，咬清楚，不要快。' },
+  3:{ title:'舌面音 j/q/x', text:'七巷一个漆匠，西巷一个锡匠。\n七巷漆匠用了西巷锡匠的锡，\n西巷锡匠拿了七巷漆匠的漆。\n七巷漆匠气西巷锡匠用了漆，\n西巷锡匠讥七巷漆匠拿了锡。', note:'不要把"七"读成"吃"。舌面抬起，声音往前送。' },
+  4:{ title:'n/l 区分', text:'老龙恼怒闹老农，\n老农恼怒闹老龙。\n农怒龙恼农更怒，\n龙恼农怒龙怕农。\n\n牛郎年年念刘娘，\n刘娘连连念牛郎。\n郎念娘来娘念郎。', note:'如果n/l不清楚，这部分必须认真练。' },
+  5:{ title:'舌根音 g/k/h', text:'一班有个黄贺，二班有个王克。\n黄贺、王克二人搞创作，\n黄贺搞木刻，王克写诗歌。\n由于二人搞协作，\n黄贺完成了木刻，王克写好了诗歌。', note:'声音不要卡喉咙，舌根轻轻抬起。' },
+  6:{ title:'r 音练习', text:'烈日炎炎热如火，\n昨日热今日仍然热，\n一日比一日热，\n日日热夜里仍然热，\n安然对天热，天热人不热。', note:'' },
+  0:{ title:'复习最难的一段', text:'选本周练得最难的一段重复练习。\n\n第一遍：非常慢，每个字清楚。\n第二遍：正常速度。\n第三遍：录音，听，找一个问题。', note:'' },
+};
+const DAY_EN_FOCUS = {
+  1:{ title:'p/b/t/d', text:'Peter bought a better bottle today.\nBetty prepared a beautiful business presentation.', note:'p/t/k need air puff. b/d/g not from throat.' },
+  2:{ title:'f/v', text:'Five visitors found a very valuable video.\nVictor\'s voice feels very firm and clear.', note:'Upper teeth lightly touch lower lip.' },
+  3:{ title:'th', text:'These three things are worth thinking about.\nI think that this method is useful.', note:'Tongue tip between teeth, not s/z.' },
+  4:{ title:'r/l', text:'I really like learning clear English.\nThe red light is on the right side of the road.', note:'l: tongue tip on gum ridge. r: tongue curls back.' },
+  5:{ title:'s/sh/ch/j', text:'She chose a special jacket for the job.\nThe teacher changed the schedule for the project.', note:'' },
+  6:{ title:'Final sounds', text:'I worked hard, asked questions, and improved my skills.\nThe first project helped me build confidence.', note:'Do NOT drop word-final sounds.' },
+  0:{ title:'Review', text:'Review the 3 hardest sentences from this week.\nRead each 5 times.\n\nRecord → listen → fix one thing.', note:'' },
+};
+const DAY_CN_TOPIC = {1:'介绍今天做的一件事',2:'介绍一本你喜欢的书',3:'介绍一个你喜欢的城市',4:'讲一次你紧张但完成了的经历',5:'解释为什么要练口才',6:'总结这一周的变化',0:'自由表达一个话题'};
+const DAY_EN_TOPIC = {1:'Introduce yourself.',2:'Talk about your study or work experience.',3:'Describe a project you are proud of.',4:'Explain why you want to improve your English.',5:'Talk about one challenge you overcame.',6:'Describe your ideal job.',0:'Summarize what you practiced this week.'};
+
+// Build today's stages dynamically
+function buildTodayStages(day, cnW, enW) {
+  const tw = DAY_CN_TWISTER[day];
+  const ef = DAY_EN_FOCUS[day];
+  return [
+    T.breath3,
+    { ...T.longVowel3, isHold:true, holdColor:'green' },
+    { title:'中文绕口令', sub:tw.title, dur:300, lang:'cn', text:tw.text, note:tw.note },
+    { title:'中文即兴表达', sub:DAY_CN_TOPIC[day], dur:240, lang:'cn',
+      text:'我现在练习的是稳定的声音。\n我不急着说快，我先把气息放稳。\n我的声音不是从喉咙里挤出来，\n而是被气息轻轻托出来。\n\n话题：' + DAY_CN_TOPIC[day],
+      note:'结构：我想讲的是…… 原因有两个。第一…… 第二…… 所以我的结论是……' },
+    { ...T.enLong4, dur:180, isHold:true, holdColor:'purple' },
+    { title:'英文重点音', sub:ef.title, dur:420, lang:'en', text:ef.text, note:ef.note },
+    T.enRead4,
+    { title:'英文即兴表达', sub:DAY_EN_TOPIC[day], dur:300, lang:'en',
+      text:'Today\'s topic:\n' + DAY_EN_TOPIC[day],
+      note:'Structure: Today, I want to talk about… There are two reasons. First,… Second,… That is why…' },
+  ];
+}
+
+// All plan definitions
+function buildPlans(day, cnW, enW) {
+  return {
+    today: {
+      name:'今日练习', sub:'每天 35 分钟', icon:'⏱',
+      stages: buildTodayStages(day, cnW, enW)
+    },
+    cn1: {
+      name:'中文 · 第1周', sub:'气息和发声基础', icon:'中',
+      stages:[T.breath4, T.longVowel5, T.qixi, T.houyin, T.relax1]
+    },
+    cn2: {
+      name:'中文 · 第2周', sub:'唇音和舌头启动', icon:'中',
+      stages:[T.breath3, T.longVowel4, T.chunyin, T.chunyin2, T.dun, T.relax2]
+    },
+    cn3: {
+      name:'中文 · 第3周', sub:'舌头灵活度', icon:'中',
+      stages:[T.breath3, T.sheshi, T.jqx, T.nl, T.speak3]
+    },
+    cn4: {
+      name:'中文 · 第4周', sub:'舌根音和真实表达', icon:'中',
+      stages:[T.breath2, T.longVowel3, T.genyin, T.rl, T.zonghe,
+        { title:'即兴表达', sub:DAY_CN_TOPIC[day], dur:300, lang:'cn',
+          text:'话题：' + DAY_CN_TOPIC[day],
+          note:'结构：我想讲的是…… 原因有两个。第一…… 第二…… 所以我的结论是……' }]
+    },
+    en1: {
+      name:'英文 · Week 1', sub:'Breath & Voice', icon:'E',
+      stages:[T.breathEn, T.enLong4, T.enGasBreath, T.enReading1]
+    },
+    en2: {
+      name:'英文 · Week 2', sub:'Articulation', icon:'E',
+      stages:[T.breathEn, T.enPlosive, T.enFV, T.enTH, T.enRead2]
+    },
+    en3: {
+      name:'英文 · Week 3', sub:'Tongue Flexibility', icon:'E',
+      stages:[T.enRL, T.enSsh, T.enFinal, T.enRhythm]
+    },
+    en4: {
+      name:'英文 · Week 4', sub:'Integration', icon:'E',
+      stages:[T.enWarm, {
+          title:'综合发音', sub:ef_for(day).title, dur:480, lang:'en',
+          text:ef_for(day).text, note:ef_for(day).note
+        }, T.enRead4,
+        { title:'即兴表达', sub:DAY_EN_TOPIC[day], dur:420, lang:'en',
+          text:"Today's topic:\n" + DAY_EN_TOPIC[day],
+          note:"Structure: Today, I want to talk about… There are two reasons. First,… Second,… That is why…" }]
+    },
+  };
+}
+function ef_for(day){ return DAY_EN_FOCUS[day] || DAY_EN_FOCUS[1]; }
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let plans = {};
+let currentPlanId = 'today';
+let currentStageIdx = 0;
+let timer = { running:false, remaining:0, totalElapsed:0, lastTs:null, animId:null };
+let breathPhaseIdx = 0;
+let breathPhaseTimeout = null;
+let holdCycleTimeout = null;
+let STAGES = [];
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+function init() {
+  const today = new Date().getDay();
+  document.getElementById('daySelect').value = today;
+  refreshPlans();
+  buildPlanNav();
+  setPlan('today', 0);
+}
+
+function getDay()  { return parseInt(document.getElementById('daySelect').value); }
+function getCnW()  { return parseInt(document.getElementById('cnWeek').value); }
+function getEnW()  { return parseInt(document.getElementById('enWeek').value); }
+
+function refreshPlans() {
+  plans = buildPlans(getDay(), getCnW(), getEnW());
+}
+
+function onSettingsChange() {
+  const wasRunning = timer.running;
+  pauseTimer();
+  refreshPlans();
+  buildPlanNav();
+  const idx = currentStageIdx; // try to preserve position
+  setPlan(currentPlanId, Math.min(idx, plans[currentPlanId].stages.length - 1));
+}
+
+// ══════════════════════════════════════════════
+// PLAN NAV
+// ══════════════════════════════════════════════
+const PLAN_ORDER = ['today','cn1','cn2','cn3','cn4','en1','en2','en3','en4'];
+function buildPlanNav() {
+  const nav = document.getElementById('planNav');
+  nav.innerHTML = '';
+  PLAN_ORDER.forEach(id => {
+    const p = plans[id];
+    const el = document.createElement('div');
+    el.className = 'plan-item' + (id === currentPlanId ? ' active' : '');
+    el.id = 'nav-' + id;
+    el.tabIndex = 0;
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', `Choose ${p.name}`);
+    el.innerHTML = `<div class="plan-icon">${p.icon}</div>
+      <div class="plan-info">
+        <div class="plan-name">${p.name}</div>
+        <div class="plan-sub">${p.sub}</div>
+      </div>`;
+    el.onclick = () => { stopTimer(); setPlan(id, 0); };
+    el.onkeydown = (e) => {
+      if (e.code === 'Enter' || e.code === 'Space') {
+        e.preventDefault();
+        stopTimer();
+        setPlan(id, 0);
+      }
+    };
+    nav.appendChild(el);
+  });
+}
+
+function setPlan(id, stageIdx) {
+  currentPlanId = id;
+  STAGES = plans[id].stages;
+  document.querySelectorAll('.plan-item').forEach(el => el.classList.remove('active'));
+  const nav = document.getElementById('nav-' + id);
+  if (nav) nav.classList.add('active');
+  document.getElementById('rightPlanName').textContent = plans[id].name;
+  document.getElementById('rightPlanSub').textContent = plans[id].sub;
+  buildStagesList();
+  goToStage(stageIdx || 0);
+}
+
+// ══════════════════════════════════════════════
+// STAGES LIST (right column)
+// ══════════════════════════════════════════════
+function buildStagesList() {
+  const list = document.getElementById('stagesList');
+  list.innerHTML = '';
+  STAGES.forEach((s, i) => {
+    const el = document.createElement('div');
+    el.className = 'stage-item' + (i === currentStageIdx ? ' active' : (i < currentStageIdx ? ' done' : ''));
+    el.id = 'si-' + i;
+    el.tabIndex = 0;
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', `Go to stage ${i + 1}: ${s.title}`);
+    const m = Math.floor(s.dur/60), sec = s.dur%60;
+    el.innerHTML = `<div class="stage-num" id="sn-${i}">${i < currentStageIdx ? '✓' : i+1}</div>
+      <div class="stage-info">
+        <div class="stage-item-name">${s.title}</div>
+        <div class="stage-item-sub">${s.sub||''}</div>
+      </div>
+      <div class="stage-dur">${m}:${String(sec).padStart(2,'0')}</div>`;
+    el.onclick = () => { stopTimer(); goToStage(i); };
+    el.onkeydown = (e) => {
+      if (e.code === 'Enter' || e.code === 'Space') {
+        e.preventDefault();
+        stopTimer();
+        goToStage(i);
+      }
+    };
+    list.appendChild(el);
+  });
+}
+
+function updateStagesList() {
+  STAGES.forEach((s, i) => {
+    const el = document.getElementById('si-' + i);
+    const sn = document.getElementById('sn-' + i);
+    if (!el) return;
+    el.className = 'stage-item' + (i===currentStageIdx?' active':(i<currentStageIdx?' done':''));
+    sn.textContent = i < currentStageIdx ? '✓' : i+1;
+  });
+  // Scroll active into view
+  const active = document.getElementById('si-' + currentStageIdx);
+  if (active) active.scrollIntoView({ block:'nearest', behavior:'smooth' });
+  updateSessionProgress();
+}
+
+// ══════════════════════════════════════════════
+// GO TO STAGE
+// ══════════════════════════════════════════════
+function goToStage(idx) {
+  currentStageIdx = idx;
+  const s = STAGES[idx];
+  timer.remaining = s.dur;
+  timer.running = false;
+  if (timer.animId) cancelAnimationFrame(timer.animId);
+  stopBreathing();
+
+  // Update UI
+  const titleEl = document.getElementById('stageTitle');
+  const langTag = document.createElement('span');
+  langTag.className = 'lang-tag';
+  langTag.textContent = s.lang === 'en' ? 'EN' : '中文';
+  titleEl.textContent = s.title;
+  titleEl.appendChild(langTag);
+
+  // Practice text
+  const textEl = document.getElementById('practiceText');
+  textEl.className = 'practice-text' + (s.lang==='en'?' en':' cn');
+  textEl.textContent = s.text || '';
+  document.getElementById('practiceNote').textContent = s.note || '';
+
+  // Timer display
+  setTimerDisplay(s.dur);
+  setRing(0, false);
+  document.getElementById('startBtn').textContent = '▶ Start';
+  document.getElementById('startBtn').className = 'btn-primary';
+  document.getElementById('startBtn').setAttribute('aria-label', 'Start current stage');
+  document.getElementById('completeRing').style.opacity = '0';
+  document.getElementById('timerRing').style.stroke = 'var(--ring-color)';
+  document.getElementById('timerTime').classList.remove('urgent');
+  document.querySelector('.center').classList.remove('is-running');
+
+  updateStagesList();
+  updateSessionProgress();
+
+  // Stage 1 breathes; stages 2 and 5 use the same balloon for 8-second holds.
+  const ball = document.querySelector('.breath-ball-inner');
+  ball.style.transition = 'none';
+  ball.style.transform = s.isHold ? 'scale(.72)' : 'scale(1)';
+  ball.style.background = 'radial-gradient(circle at 35% 35%, #f8d5c5, var(--accent))';
+  ball.style.boxShadow = '0 0 30px rgba(196,98,58,.3)';
+  document.getElementById('breathBall').classList.toggle('visible', !!(s.isBreath || s.isHold));
+}
+
+function updateSessionProgress(stageProgress = 0) {
+  const mixedProgress = Math.min(currentStageIdx + stageProgress, STAGES.length);
+  const pct = STAGES.length ? (mixedProgress / STAGES.length) * 100 : 0;
+  document.getElementById('sessionProgressFill').style.width = pct.toFixed(1) + '%';
+}
+
+// ══════════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════════
+function toggleTimer() {
+  if (timer.running) pauseTimer(); else startTimer();
+}
+
+function startTimer() {
+  timer.running = true;
+  timer.lastTs = null;
+  document.getElementById('startBtn').textContent = '⏸ Pause';
+  document.getElementById('startBtn').className = 'btn-primary paused';
+  document.getElementById('startBtn').setAttribute('aria-label', 'Pause current stage');
+  document.querySelector('.center').classList.add('is-running');
+  if (STAGES[currentStageIdx].isBreath) startBreathing();
+  else if (STAGES[currentStageIdx].isHold) startHoldBall();
+  timer.animId = requestAnimationFrame(timerTick);
+}
+
+function pauseTimer() {
+  timer.running = false;
+  if (timer.animId) cancelAnimationFrame(timer.animId);
+  document.getElementById('startBtn').textContent = '▶ Resume';
+  document.getElementById('startBtn').className = 'btn-primary';
+  document.getElementById('startBtn').setAttribute('aria-label', 'Resume current stage');
+  document.querySelector('.center').classList.remove('is-running');
+  stopBreathing();
+}
+
+function stopTimer() {
+  timer.running = false;
+  if (timer.animId) cancelAnimationFrame(timer.animId);
+  stopBreathing();
+  document.getElementById('startBtn').textContent = '▶ Start';
+  document.getElementById('startBtn').className = 'btn-primary';
+  document.getElementById('startBtn').setAttribute('aria-label', 'Start current stage');
+  document.querySelector('.center').classList.remove('is-running');
+}
+
+function resetStage() {
+  stopTimer();
+  goToStage(currentStageIdx);
+}
+
+function skipStage() {
+  stopTimer();
+  if (currentStageIdx < STAGES.length - 1) {
+    goToStage(currentStageIdx + 1);
+  }
+}
+
+function timerTick(ts) {
+  if (!timer.running) return;
+  if (!timer.lastTs) timer.lastTs = ts;
+  const delta = Math.min((ts - timer.lastTs) / 1000, 0.5); // cap at 0.5s
+  timer.lastTs = ts;
+  timer.remaining = Math.max(0, timer.remaining - delta);
+  timer.totalElapsed += delta;
+
+  const stageDur = STAGES[currentStageIdx].dur;
+  const progress = 1 - timer.remaining / stageDur;
+
+  setTimerDisplay(timer.remaining);
+  setRing(progress, timer.remaining < 30);
+  document.getElementById('timerTime').classList.toggle('urgent', timer.remaining <= 30);
+  updateSessionProgress(progress);
+
+  if (timer.remaining <= 0) {
+    onStageComplete();
+    return;
+  }
+  timer.animId = requestAnimationFrame(timerTick);
+}
+
+function setTimerDisplay(rem) {
+  const m = Math.floor(rem/60), s = Math.floor(rem%60);
+  document.getElementById('timerTime').textContent = m + ':' + String(s).padStart(2,'0');
+}
+
+function setRing(progress, warn) {
+  const offset = CIRC * progress;
+  const ring = document.getElementById('timerRing');
+  ring.style.strokeDashoffset = offset.toFixed(1);
+  if (progress > .88) ring.style.stroke = '#c0392b';
+  else if (progress > .66) ring.style.stroke = '#e67e22';
+  else ring.style.stroke = 'var(--ring-color)';
+}
+
+// ══════════════════════════════════════════════
+// STAGE COMPLETE
+// ══════════════════════════════════════════════
+function onStageComplete() {
+  timer.running = false;
+  timer.remaining = 0;
+  setTimerDisplay(0);
+  setRing(1, false);
+  document.getElementById('timerRing').style.stroke = '#4a9e74';
+  document.getElementById('completeRing').style.opacity = '1';
+  document.getElementById('startBtn').textContent = '▶ Start';
+  document.getElementById('startBtn').className = 'btn-primary';
+  document.querySelector('.center').classList.remove('is-running');
+  stopBreathing();
+  playChime();
+
+  // Update stages list
+  updateStagesList();
+  updateSessionProgress(1);
+
+  if (currentStageIdx < STAGES.length - 1) {
+    setTimeout(() => {
+      document.getElementById('completeRing').style.opacity = '0';
+      goToStage(currentStageIdx + 1);
+    }, 1800);
+  } else {
+    setTimeout(showComplete, 1800);
+  }
+}
+
+function showComplete() {
+  const plan = plans[currentPlanId];
+  const total = Math.floor(timer.totalElapsed/60);
+  document.getElementById('cbSub').textContent =
+    `${plan.name} · 共 ${STAGES.length} 个阶段 · 总用时约 ${total} 分钟`;
+  document.getElementById('completeBanner').classList.add('show');
+  playFinale();
+}
+
+function restartSession() {
+  document.getElementById('completeBanner').classList.remove('show');
+  timer.totalElapsed = 0;
+  goToStage(0);
+  buildStagesList();
+}
+
+// ══════════════════════════════════════════════
+// BREATHING ANIMATION
+// ══════════════════════════════════════════════
+const BREATH_PHASES = [
+  { name:'吸气 Inhale', dur:4000, scale:1.6, color:'#c4623a', bgFrom:'#f8d5c5', bgTo:'#c4623a' },
+  { name:'停 Hold',     dur:1000, scale:1.6, color:'#8b5cf6', bgFrom:'#e0d0f8', bgTo:'#7c3aed' },
+  { name:'呼气 Exhale', dur:6000, scale:0.9, color:'#4a9e74', bgFrom:'#c8efd9', bgTo:'#2d7a52' },
+];
+
+const HOLD_COLORS = {
+  green:  { baseFrom:'#d6f4df', baseTo:'#4a9e74', growFrom:'#e8f9ed', growTo:'#2d7a52', glow:'rgba(74,158,116,.38)' },
+  purple: { baseFrom:'#e6ddff', baseTo:'#8b5cf6', growFrom:'#efe8ff', growTo:'#6d3fd1', glow:'rgba(139,92,246,.38)' },
+};
+
+function startBreathing() {
+  breathPhaseIdx = 0;
+  runBreathPhase();
+}
+
+function startHoldBall() {
+  runHoldCycle();
+}
+
+function runHoldCycle() {
+  if (!timer.running) return;
+  const colors = HOLD_COLORS[STAGES[currentStageIdx].holdColor] || HOLD_COLORS.green;
+  const ball = document.querySelector('.breath-ball-inner');
+  ball.style.transition = 'none';
+  ball.style.transform = 'scale(.72)';
+  ball.style.background = `radial-gradient(circle at 35% 35%, ${colors.baseFrom}, ${colors.baseTo})`;
+  ball.style.boxShadow = `0 0 30px ${colors.glow}`;
+  document.getElementById('breathPhaseLbl').textContent = '';
+
+  requestAnimationFrame(() => {
+    if (!timer.running) return;
+    ball.style.transition = 'transform 8s linear, background 8s ease, box-shadow 8s ease';
+    ball.style.transform = 'scale(1.65)';
+    ball.style.background = `radial-gradient(circle at 35% 35%, ${colors.growFrom}, ${colors.growTo})`;
+    ball.style.boxShadow = `0 0 44px ${colors.glow}`;
+  });
+
+  holdCycleTimeout = setTimeout(runHoldCycle, 8250);
+}
+
+function runBreathPhase() {
+  if (!timer.running) return;
+  const ph = BREATH_PHASES[breathPhaseIdx];
+  const ball = document.querySelector('.breath-ball-inner');
+  const lbl = document.getElementById('breathPhaseLbl');
+  ball.style.transition = `transform ${ph.dur/1000}s ease-in-out, background ${ph.dur/1000}s ease`;
+  ball.style.transform = `scale(${ph.scale})`;
+  ball.style.background = `radial-gradient(circle at 35% 35%, ${ph.bgFrom}, ${ph.bgTo})`;
+  ball.style.boxShadow = `0 0 40px ${ph.color}55`;
+  lbl.textContent = ph.name;
+  lbl.style.color = ph.color;
+  breathPhaseTimeout = setTimeout(() => {
+    breathPhaseIdx = (breathPhaseIdx + 1) % 3;
+    runBreathPhase();
+  }, ph.dur);
+}
+
+function stopBreathing() {
+  if (breathPhaseTimeout) clearTimeout(breathPhaseTimeout);
+  if (holdCycleTimeout) clearTimeout(holdCycleTimeout);
+  breathPhaseTimeout = null;
+  holdCycleTimeout = null;
+  document.getElementById('breathPhaseLbl').textContent = '';
+}
+
+// ══════════════════════════════════════════════
+// SOUND
+// ══════════════════════════════════════════════
+function playChime() {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    [[523.25, 0, .12], [659.25, .12, .1], [783.99, .26, .1], [1046.5, .42, .09]]
+      .forEach(([f, d, v]) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = 'sine'; o.frequency.value = f;
+        o.connect(g); g.connect(ac.destination);
+        const t = ac.currentTime + d;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(v, t+.04);
+        g.gain.exponentialRampToValueAtTime(.001, t+1.4);
+        o.start(t); o.stop(t+1.5);
+      });
+  } catch(e) {}
+}
+
+function playFinale() {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    [[523.25,0],[659.25,.1],[783.99,.2],[1046.5,.32],[1318.5,.46],[1568,.62]]
+      .forEach(([f,d]) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = 'sine'; o.frequency.value = f;
+        o.connect(g); g.connect(ac.destination);
+        const t = ac.currentTime + d;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(.08, t+.04);
+        g.gain.exponentialRampToValueAtTime(.001, t+1.6);
+        o.start(t); o.stop(t+1.7);
+      });
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { e.preventDefault(); toggleTimer(); }
+  if (e.code === 'ArrowRight') skipStage();
+  if (e.code === 'ArrowLeft') { stopTimer(); goToStage(Math.max(0, currentStageIdx-1)); }
+  if (e.code === 'KeyR') resetStage();
+});
+
+// ══════════════════════════════════════════════
+// STAGE TITLE HTML helper
+// ══════════════════════════════════════════════
+// Fix: stageTitle.innerHTML set in goToStage uses lang-tag span
+// Already handled in goToStage.
+
+// ══════════════════════════════════════════════
+// START
+// ══════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
